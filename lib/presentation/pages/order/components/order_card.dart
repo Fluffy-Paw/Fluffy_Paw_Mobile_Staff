@@ -33,10 +33,12 @@ class OrderCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(
               12.r,
             ),
-            // onTap: () {
-            //   ref.read(orderIdProvider.notifier).state = order.id;
-            //   context.nav.pushNamed(Routes.orderDetailsView, arguments: order);
-            // },
+            onTap: () {
+              context.nav.pushNamed(
+                Routes.orderDetailsView,
+                arguments: order,
+              );
+            },
             child: Stack(
               children: [
                 Padding(

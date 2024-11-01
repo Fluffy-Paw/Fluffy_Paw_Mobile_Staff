@@ -16,12 +16,20 @@ class ApiClient{
   };
 
   Future<Response> get(String url, {Map<String, dynamic>? query}) async {
-    return _dio.get(
-      url,
-      queryParameters: query,
-      options: Options(headers: defaultHeaders),
-    );
-  }
+  return _dio.get(
+    url,
+    queryParameters: query,
+    options: Options(
+      headers: defaultHeaders,
+      followRedirects: false,
+      validateStatus: (status) {
+            // Accept all status codes and handle them in the business logic
+            return true;
+          },
+    ),
+  );
+}
+
   Future<Response> post(
       String url, {
         dynamic data,
@@ -58,6 +66,23 @@ class ApiClient{
         validateStatus: ((status) {
           return status! <= 500;
         }),
+      ),
+    );
+  }
+  Future<Response> patch(
+    String url, {
+    Map<String, dynamic>? data,
+    Map<String, dynamic>? headers,
+  }) async {
+    return _dio.patch(
+      url,
+      data: data,
+      options: Options(
+        headers: headers ?? defaultHeaders,
+        followRedirects: false,
+        validateStatus: (status) {
+          return status! <= 500;
+        },
       ),
     );
   }

@@ -64,6 +64,41 @@ class HiveService {
       return false;
     }
   }
+  Future<void> saveOrderStatuses({
+    required int acceptedOrders,
+    required int pendingOrders,
+    required int canceledOrders,
+    required int deniedOrders,
+    required int overTimeOrders,
+    required int endedOrders,
+  }) async {
+    final orderStatusBox = await Hive.openBox(AppConstants.orderStatusBox);
+    orderStatusBox.put(AppConstants.acceptedOrders, acceptedOrders);
+    orderStatusBox.put(AppConstants.pendingOrders, pendingOrders);
+    orderStatusBox.put(AppConstants.canceledOrders, canceledOrders);
+    orderStatusBox.put(AppConstants.deniedOrders, deniedOrders);
+    orderStatusBox.put(AppConstants.overTimeOrders, overTimeOrders);
+    orderStatusBox.put(AppConstants.endedOrders, endedOrders);
+  }
+
+  // Hàm lấy dữ liệu trạng thái đơn hàng
+  Future<Map<String, int>> getOrderStatuses() async {
+    final orderStatusBox = await Hive.openBox(AppConstants.orderStatusBox);
+    return {
+      AppConstants.acceptedOrders: orderStatusBox.get(AppConstants.acceptedOrders, defaultValue: 0),
+      AppConstants.pendingOrders: orderStatusBox.get(AppConstants.pendingOrders, defaultValue: 0),
+      AppConstants.canceledOrders: orderStatusBox.get(AppConstants.canceledOrders, defaultValue: 0),
+      AppConstants.deniedOrders: orderStatusBox.get(AppConstants.deniedOrders, defaultValue: 0),
+      AppConstants.overTimeOrders: orderStatusBox.get(AppConstants.overTimeOrders, defaultValue: 0),
+      AppConstants.endedOrders: orderStatusBox.get(AppConstants.endedOrders, defaultValue: 0),
+    };
+  }
+
+  // Hàm cập nhật trạng thái đơn hàng khi có thay đổi
+  Future<void> updateOrderStatus(String status, int newCount) async {
+    final orderStatusBox = await Hive.openBox(AppConstants.orderStatusBox);
+    orderStatusBox.put(status, newCount);
+  }
 }
 
 final hiveStoreService = Provider((ref) => HiveService(ref));

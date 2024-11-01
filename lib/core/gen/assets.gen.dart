@@ -26,9 +26,11 @@ class $AssetsImageGen {
   /// File path: assets/image/question.png
   AssetGenImage get question =>
       const AssetGenImage('assets/image/question.png');
+  AssetGenImage get alert =>
+      const AssetGenImage('assets/image/alert.png');
 
   /// List of all assets
-  List<AssetGenImage> get values => [question];
+  List<AssetGenImage> get values => [question, alert];
 }
 
 class $AssetsSvgGen {
@@ -105,6 +107,7 @@ class $AssetsSvgGen {
 
   /// File path: assets/svg/total_doller.svg
   String get totalDoller => 'assets/svg/total_doller.svg';
+  
 
   /// List of all assets
   List<String> get values => [

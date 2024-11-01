@@ -7,8 +7,6 @@ import 'package:fluffypawsm/core/utils/app_text_style.dart';
 import 'package:fluffypawsm/core/utils/global_function.dart';
 import 'package:fluffypawsm/data/controller/dashboard_controller.dart';
 import 'package:fluffypawsm/data/controller/order_controller.dart';
-import 'package:fluffypawsm/data/models/dashboard/dashboard_model.dart';
-
 import 'package:fluffypawsm/presentation/pages/dashboard/components/pending_order_card.dart';
 import 'package:fluffypawsm/presentation/pages/dashboard/components/summery_card.dart';
 import 'package:fluffypawsm/presentation/widgets/component/home_shimmer.dart';
@@ -32,7 +30,17 @@ class DashboardLayout extends ConsumerStatefulWidget {
 
 class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
   @override
+  void initState() {
+    super.initState();
+    // Fetch pending orders when component mounts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(orderController.notifier).getOrderListWithFilter('Pending');
+    });
+  }
+  @override
   Widget build(BuildContext context) {
+
+    final pendingOrder = ref.watch(orderController.notifier).dashboard?.orders ?? [];
     return Scaffold(
       backgroundColor:
       Theme.of(context).scaffoldBackgroundColor == AppColor.blackColor
@@ -214,23 +222,13 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
   }
 
   Widget _buildOrderList({required BuildContext context}) {
-    final dashboard = ref.read(dashboardController.notifier).dashboard;
-
-    // Kiểm tra nếu dashboard là null
-    if (dashboard == null) {
-      return Center(
-        child: Text("No orders available"),
-      );
-    }
-    // Default orders
-    final List<Order> pendingOrder =
-        ref.read(dashboardController.notifier).dashboard!.orders;
-
+    final pendingOrder = ref.watch(pendingOrdersProvider);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
         children: [
+          // Header section
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -276,33 +274,49 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
               )
             ],
           ),
+          Gap(10.h),
+          // List section
           Expanded(
-            child: AnimationLimiter(
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  await ref.read(dashboardController.notifier).getDashboardInfo();
-                },
-                child: ListView.builder(
-                  padding: EdgeInsets.only(top: 5.h),
-                  shrinkWrap: true,
-                  itemCount: pendingOrder.length,
-                  itemBuilder: (context, index) {
-                    final order = pendingOrder[index];
-                    return AnimationConfiguration.staggeredList(
-                      position: index,
-                      duration: const Duration(milliseconds: 500),
-                      child: SlideAnimation(
-                        verticalOffset: 50.0.w,
-                        child: FadeInAnimation(
-                          child: PendingOrderCard(order: order), // Use the Order object
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await ref.read(orderController.notifier).getOrderListWithFilter('Pending');
+              },
+              child: pendingOrder.isEmpty
+                  ? ListView( // Wrap empty state in ListView for refresh capability
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height / 3,
+                          child: Center(
+                            child: Text(
+                              "No new orders",
+                              style: AppTextStyle(context).bodyText,
+                            ),
+                          ),
                         ),
+                      ],
+                    )
+                  : AnimationLimiter(
+                      child: ListView.builder(
+                        padding: EdgeInsets.only(top: 5.h),
+                        physics: const AlwaysScrollableScrollPhysics(), // Add this
+                        itemCount: pendingOrder.length,
+                        itemBuilder: (context, index) {
+                          final order = pendingOrder[index];
+                          return AnimationConfiguration.staggeredList(
+                            position: index,
+                            duration: const Duration(milliseconds: 500),
+                            child: SlideAnimation(
+                              verticalOffset: 50.0.w,
+                              child: FadeInAnimation(
+                                child: PendingOrderCard(order: order),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              ),
+                    ),
             ),
-          )
+          ),
         ],
       ),
     );

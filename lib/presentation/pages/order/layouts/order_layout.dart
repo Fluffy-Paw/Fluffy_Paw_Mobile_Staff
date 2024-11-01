@@ -1,3 +1,4 @@
+import 'package:fluffypawsm/core/auth/hive_service.dart';
 import 'package:fluffypawsm/core/generated/l10n.dart';
 import 'package:fluffypawsm/core/utils/app_color.dart';
 import 'package:fluffypawsm/core/utils/app_text_style.dart';
@@ -42,6 +43,8 @@ class _OrderLayoutState extends ConsumerState<OrderLayout> {
     'Ended'
   ];
 
+  Map<String, int> orderCounts = {};
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +52,9 @@ class _OrderLayoutState extends ConsumerState<OrderLayout> {
       page = 1;
       ref.read(activeOrderTab.notifier).state = 0;
       ref.read(selectedOrderStatus.notifier).state = 'Accepted';
+      orderCounts = await ref.read(hiveStoreService).getOrderStatuses();
+      print("Order Counts from Hive: $orderCounts");
+      setState(() {});
       await ref.read(orderController.notifier).getOrderListWithFilter(ref.read(selectedOrderStatus));
       scrollController.addListener(() {
         scrollListener();
@@ -178,7 +184,7 @@ class _OrderLayoutState extends ConsumerState<OrderLayout> {
                     },
                     child: OrderTabCard(
                       isActiveTab: ref.watch(activeOrderTab) == index,
-                      orderCount: getOrderCountByStatus(orders, orderStatuses[index]),
+                      orderCount: orderCounts[orderStatuses[index]] ?? 0,
                       orderStatus: GlobalFunction.getOrderStatusLocalizationText(
                         context: context,
                         status: orderStatuses[index],
@@ -206,17 +212,30 @@ class _OrderLayoutState extends ConsumerState<OrderLayout> {
                 page = 1;
                 ref.read(activeOrderTab.notifier).state = 0;
                 ref.read(selectedOrderStatus.notifier).state = 'Pending';
-                await ref.read(orderController.notifier).getOrderListWithFilter(
-                  ref.read(selectedOrderStatus),
+                final result = await ref.read(orderController.notifier).getOrderListWithFilter(
+                ref.read(selectedOrderStatus),
+              );
+              debugPrint(result.toString());
+
+              if (result == false) {
+                debugPrint("false");
+                Center(
+            child: Text(
+              
+              S.of(context).orderNotFound,
+              style: AppTextStyle(context)
+                  .bodyText
+                  .copyWith(fontWeight: FontWeight.w400),
+            ),
+          ); // Ensures orders list is empty
+              } else if (itemScrollController.isAttached) {
+                itemScrollController.scrollTo(
+                  index: 0,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOutCubic,
                 );
-                if (itemScrollController.isAttached) {
-                  itemScrollController.scrollTo(
-                    index: 0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOutCubic,
-                  );
-                }
-              },
+              }
+            },
               child: ListView.builder(
                 controller: scrollController,
                 padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),

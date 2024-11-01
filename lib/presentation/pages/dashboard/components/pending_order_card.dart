@@ -1,10 +1,11 @@
+import 'package:fluffypawsm/core/gen/assets.gen.dart';
 import 'package:fluffypawsm/core/generated/l10n.dart';
 import 'package:fluffypawsm/core/utils/app_color.dart';
 import 'package:fluffypawsm/core/utils/app_text_style.dart';
 import 'package:fluffypawsm/core/utils/global_function.dart';
 import 'package:fluffypawsm/data/models/dashboard/dashboard_model.dart';
-
 import 'package:fluffypawsm/dependency_injection/dependency_injection.dart';
+import 'package:fluffypawsm/presentation/widgets/component/confirmation_dialog.dart';
 import 'package:fluffypawsm/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,12 +31,12 @@ class PendingOrderCard extends StatelessWidget {
         child: Consumer(builder: (context, ref, _) {
           return ListTile(
             contentPadding: EdgeInsets.zero.copyWith(left: 20.w),
-            // onTap: () {
-            //   ref.read(orderIdProvider.notifier).state = order.id;
-            //   final orderData = orderModel.Order.fromMap(order.toMap());
-            //   context.nav
-            //       .pushNamed(Routes.orderDetailsView, arguments: orderData);
-            // },
+            onTap: () {
+              // // Đặt order ID và điều hướng đến trang chi tiết order
+              // ref.read(orderIdProvider.notifier).state = order.id;
+              // final orderData = orderModel.Order.fromMap(order.toMap());
+              // Navigator.of(context).pushNamed(Routes.orderDetailsView, arguments: orderData);
+            },
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
@@ -47,7 +48,7 @@ class PendingOrderCard extends StatelessWidget {
                   fontStyle: FontStyle.italic),
             ),
             subtitle: _buildSubTitle(context: context),
-            trailing: _buildTrailing(context: context),
+            trailing: _buildTrailing(context: context, ref: ref),
           );
         }),
       ),
@@ -109,102 +110,88 @@ class PendingOrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTrailing({required BuildContext context}) {
-    return Consumer(builder: (context, ref, _) {
-      return SizedBox(
-        width: MediaQuery.of(context).size.width / 3.3,
-        height: 50.h,
-        child: Row(
-          children: [
-            VerticalDivider(
-              thickness: 1,
-              color: AppColor.blackColor.withOpacity(0.2),
-              indent: 15,
-              endIndent: 15,
-            ),
-            Gap(6.w),
-            InkWell(
-              borderRadius: BorderRadius.circular(50.0),
-              // onTap: () {
-              //   showDialog(
-              //       context: context,
-              //       builder: (context) => ConfirmationDialog(
-              //         //isLoading: ref.watch(orderStatusController),
-              //         text: S.of(context).orderCancelDes,
-              //         cancelTapAction: () {
-              //           context.nav.pop(context);
-              //         },
-              //         applyTapAction: () {
-              //           ref
-              //               .read(orderStatusController.notifier)
-              //               .updateOrderStatus(
-              //             status: 'Cancelled',
-              //             orderId: order.id,
-              //           )
-              //               .then((response) {
-              //             if (response.isSuccess) {
-              //               GlobalFunction.showCustomSnackbar(
-              //                   message: response.message,
-              //                   isSuccess: response.isSuccess);
-              //               ref
-              //                   .read(orderStatusController.notifier)
-              //                   .getStatusWiseOrderCount();
-              //               ref.read(orderController.notifier).getOrders(
-              //                   status: 'Pending',
-              //                   page: 1,
-              //                   perPage: 10,
-              //                   pagination: false);
-              //             }
-              //           });
-              //           context.nav.pop(context);
-              //         },
-              //         image: Assets.image.alert.image(width: 90.w),
-              //       ));
-              // },
-              child: CircleAvatar(
-                radius: 18.sp,
-                backgroundColor: AppColor.red100,
-                child: const Icon(
-                  Icons.close,
-                  color: AppColor.redColor,
-                ),
+  Widget _buildTrailing({required BuildContext context, required WidgetRef ref}) {
+    final cancelMessage = S.of(context).orderCancelDes;
+    final confirmMessage = S.of(context).confirmOrder;
+    
+    // Lưu các function cần thiết
+    final orderControllerNotifier = ref.read(orderController.notifier);
+    final showSnackbar = (String message) => GlobalFunction.showCustomSnackbar(
+      message: message,
+      isSuccess: true,
+    );
+
+    return SizedBox(
+      width: MediaQuery.of(context).size.width / 3.3,
+      height: 50.h,
+      child: Row(
+        children: [
+          VerticalDivider(
+            thickness: 1,
+            color: AppColor.blackColor.withOpacity(0.2),
+            indent: 15,
+            endIndent: 15,
+          ),
+          Gap(6.w),
+          InkWell(
+            borderRadius: BorderRadius.circular(50.0),
+            onTap: () {
+              if (context.mounted) {
+                showDialog(
+                  context: context,
+                  builder: (dialogContext) => ConfirmationDialog(
+                    isLoading: ref.watch(orderController),
+                    text: cancelMessage,
+                    cancelTapAction: () {
+                      Navigator.of(dialogContext).pop();
+                    },
+                    applyTapAction: () async {
+                      final success = await orderControllerNotifier.deniedBooking(order.id);
+                      if (success && dialogContext.mounted) {
+                        showSnackbar(cancelMessage);
+                        await orderControllerNotifier.getOrderListWithFilter('Pending');
+                      }
+                      if (dialogContext.mounted) {
+                        Navigator.of(dialogContext).pop();
+                      }
+                    },
+                    image: Assets.image.alert.image(width: 90.w),
+                  ),
+                );
+              }
+            },
+            child: CircleAvatar(
+              radius: 18.sp,
+              backgroundColor: AppColor.red100,
+              child: const Icon(
+                Icons.close,
+                color: AppColor.redColor,
               ),
             ),
-            Gap(10.w),
-            InkWell(
-              borderRadius: BorderRadius.circular(50.0),
-              // onTap: () {
-              //   ref
-              //       .read(orderStatusController.notifier)
-              //       .updateOrderStatus(status: 'Confirm', orderId: order.id)
-              //       .then((response) {
-              //     if (response.isSuccess) {
-              //       GlobalFunction.showCustomSnackbar(
-              //           message: response.message,
-              //           isSuccess: response.isSuccess);
-              //       ref
-              //           .read(orderStatusController.notifier)
-              //           .getStatusWiseOrderCount();
-              //       ref.read(orderController.notifier).getOrders(
-              //           status: 'Pending',
-              //           page: 1,
-              //           perPage: 10,
-              //           pagination: false);
-              //     }
-              //   });
-              // },
-              child: CircleAvatar(
-                radius: 18.sp,
-                backgroundColor: AppColor.lime100,
-                child: const Icon(
-                  Icons.done,
-                  color: AppColor.lime500,
-                ),
+          ),
+          Gap(10.w),
+          InkWell(
+            borderRadius: BorderRadius.circular(50.0),
+            onTap: () async {
+              if (context.mounted) {
+                final success = await orderControllerNotifier.acceptBooking(order.id);
+                if (success && context.mounted) {
+                  showSnackbar(confirmMessage);
+                  await orderControllerNotifier.getOrderListWithFilter('Pending');
+                }
+              }
+            },
+            child: CircleAvatar(
+              radius: 18.sp,
+              backgroundColor: AppColor.lime100,
+              child: const Icon(
+                Icons.done,
+                color: AppColor.lime500,
               ),
             ),
-          ],
-        ),
-      );
-    });
+          ),
+        ],
+      ),
+    );
   }
 }

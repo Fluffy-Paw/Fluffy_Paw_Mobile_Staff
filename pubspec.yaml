@@ -133,6 +133,7 @@ flutter:
     - assets/svg/logout.svg
     - assets/svg/store_account.svg
     - assets/image/question.png
+    - assets/image/alert.png
 
 
 flutter_intl:

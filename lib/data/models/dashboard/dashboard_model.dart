@@ -56,6 +56,21 @@ class DashboardInfo {
       endedOrders: endedOrders ?? this.endedOrders,
     );
   }
+  factory DashboardInfo.empty() {
+  return DashboardInfo(
+    todayOrders: 0,
+    todayEarning: "0",
+    thisMonthEarnings: "0",
+    processingOrders: 0,
+    orders: [],
+    acceptedOrders: 0,
+    pendingOrders: 0,
+    canceledOrders: 0,
+    deniedOrders: 0,
+    overTimeOrders: 0,
+    endedOrders: 0,
+  );
+}
 
   static int countOrdersByStatus(List<Order> orders, String status) {
     return orders.where((order) => order.status == status).length;
@@ -196,6 +211,7 @@ class Order {
   final DateTime createDate;
   final DateTime startTime;
   final String status;
+  final String paymentMethod;
   final int cost; 
 
   Order({
@@ -207,6 +223,7 @@ class Order {
     required this.startTime,
     required this.status,
     required this.cost, 
+    required this.paymentMethod
   });
 
   Map<String, dynamic> toMap() {
@@ -219,6 +236,7 @@ class Order {
       'startTime': startTime.toIso8601String(),
       'status': status,
       'cost': cost, 
+      'paymentMethod': paymentMethod
     };
   }
 
@@ -231,6 +249,7 @@ class Order {
       createDate: DateTime.parse(map['createDate'] as String),
       startTime: DateTime.parse(map['startTime'] as String),
       status: map['status'] as String,
+      paymentMethod: map['paymentMethod'] as String,
       cost: map['cost'] as int, // Ánh xạ trường cost từ response JSON
     );
   }
