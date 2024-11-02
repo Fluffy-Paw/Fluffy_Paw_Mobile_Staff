@@ -52,6 +52,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tạo tài xế mới"),
         "createPassword": MessageLookupByLibrary.simpleMessage("Tạo mật khẩu"),
         "createRider": MessageLookupByLibrary.simpleMessage("Tạo tài xế"),
+        "createnewschedule":
+            MessageLookupByLibrary.simpleMessage("Tạo thời gian mới"),
         "customerInfo":
             MessageLookupByLibrary.simpleMessage("Thông tin khách hàng"),
         "dark": MessageLookupByLibrary.simpleMessage("Tối"),
@@ -148,6 +150,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Hồ sơ người bán"),
         "sellerSupport":
             MessageLookupByLibrary.simpleMessage("Hỗ trợ người bán"),
+        "service": MessageLookupByLibrary.simpleMessage("Dịch Vụ"),
+        "serviceschedule": MessageLookupByLibrary.simpleMessage("Lịch trình"),
         "shippingInfo":
             MessageLookupByLibrary.simpleMessage("Thông tin vận chuyển"),
         "shopDetails":
@@ -155,6 +159,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "shopLogo": MessageLookupByLibrary.simpleMessage("Logo cửa hàng"),
         "shopName": MessageLookupByLibrary.simpleMessage("Tên cửa hàng"),
         "shopOwner": MessageLookupByLibrary.simpleMessage("Chủ cửa hàng"),
+        "staffmanageservice":
+            MessageLookupByLibrary.simpleMessage("Quản lý dịch vụ chi nhánh"),
         "storeAccount":
             MessageLookupByLibrary.simpleMessage("Tài khoản cửa hàng"),
         "submit": MessageLookupByLibrary.simpleMessage("Gửi"),

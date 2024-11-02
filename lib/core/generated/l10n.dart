@@ -1209,6 +1209,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Manage Service`
+  String get staffmanageservice {
+    return Intl.message(
+      'Manage Service',
+      name: 'staffmanageservice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create New Schedule`
+  String get createnewschedule {
+    return Intl.message(
+      'Create New Schedule',
+      name: 'createnewschedule',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Service Schedule`
+  String get serviceschedule {
+    return Intl.message(
+      'Service Schedule',
+      name: 'serviceschedule',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Service`
+  String get service {
+    return Intl.message(
+      'Service',
+      name: 'service',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

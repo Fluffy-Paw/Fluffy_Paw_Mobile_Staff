@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 class AppConstants {
   static const String baseUrl = 'https://fluffypaw.azurewebsites.net';
   static const String loginUrl = '$baseUrl/api/Authentication/Login';
@@ -5,6 +7,12 @@ class AppConstants {
   static const String getAccountDetails = '$baseUrl/api/Staff/GetStoreByStaff';
   static const String acceptBooking = '$baseUrl/api/Staff/AcceptBooking';
   static const String deniedBooking = '$baseUrl/api/Staff/DeniedBooking';
+  static const String getStoreServiceForStaffbyStoreId = '$baseUrl/api/Service/GetAllServiceByStoreId';
+  static const String createStoreService = '$baseUrl/api/Staff/CreateStoreService';
+  static const String updateStoreService = '$baseUrl/api/Staff/UpdateStoreService';
+  static const String deleteStoreService = '$baseUrl/api/Staff/DeleteStoreService';
+  static const String getAllStoreServiceByServiceId = '$baseUrl/api/Staff/GetAllStoreServiceByServiceId';
+
 
   // Hive Box Names
   static const String appSettingsBox = 'appSettings';
@@ -31,4 +39,7 @@ class AppConstants {
 
   // Currency
   static const String appCurrency = "\$";
+
+
+  
 }

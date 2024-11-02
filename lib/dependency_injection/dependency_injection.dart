@@ -23,6 +23,7 @@ final orderIdProvider = StateProvider<int>((ref) => 0);
 final selectedIndexProvider = StateProvider<int>((ref) => 0);
 final selectedDateFilter = StateProvider<String>((ref) => '');
 final selectedDate = StateProvider<DateTime?>((ref) => null);
+final riderIdProvider = StateProvider<int>((ref) => 0);
 final bottomTabControllerProvider =
 Provider<PageController>((ref) => PageController());
 final genderProvider = Provider<TextEditingController>((ref) {

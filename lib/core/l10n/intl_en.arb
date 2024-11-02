@@ -116,5 +116,9 @@
   "canceled": "Canceled",
   "denied": "Denied",
   "overTime": "OverTime",
-  "ended": "Ended"
+  "ended": "Ended",
+  "staffmanageservice": "Manage Service",
+  "createnewschedule": "Create New Schedule",
+  "serviceschedule": "Service Schedule",
+  "service": "Service"
 }

@@ -294,7 +294,7 @@ class _ProfileLayoutState extends ConsumerState<ProfileLayout> {
                   MenuCard(
                     context: context,
                     icon: Assets.svg.storeAccount,
-                    text: S.of(context).storeAccount,
+                    text: S.of(context).staffmanageservice,
                     onTap: () {
                       //context.nav.pushNamed(Routes.storeAccount);
                     },

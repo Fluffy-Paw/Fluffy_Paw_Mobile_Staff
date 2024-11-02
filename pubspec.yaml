@@ -134,6 +134,8 @@ flutter:
     - assets/svg/store_account.svg
     - assets/image/question.png
     - assets/image/alert.png
+    - assets/svg/done.svg
+    - assets/svg/edit.svg
 
 
 flutter_intl:

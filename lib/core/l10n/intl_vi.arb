@@ -116,5 +116,9 @@
   "canceled": "Đã hủy",
   "denied": "Đã từ chối",
   "overTime": "Quá hạn",
-  "ended": "Đã kết thúc"
+  "ended": "Đã kết thúc",
+  "staffmanageservice": "Quản lý dịch vụ chi nhánh",
+  "createnewschedule": "Tạo thời gian mới",
+  "serviceschedule": "Lịch trình",
+  "service": "Dịch Vụ"
 }

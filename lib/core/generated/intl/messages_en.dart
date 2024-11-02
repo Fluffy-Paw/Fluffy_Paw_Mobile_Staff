@@ -53,6 +53,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "createPassword":
             MessageLookupByLibrary.simpleMessage("Create Password"),
         "createRider": MessageLookupByLibrary.simpleMessage("Create Rider"),
+        "createnewschedule":
+            MessageLookupByLibrary.simpleMessage("Create New Schedule"),
         "customerInfo": MessageLookupByLibrary.simpleMessage("Customer Info"),
         "dark": MessageLookupByLibrary.simpleMessage("Dark"),
         "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
@@ -139,11 +141,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectRider": MessageLookupByLibrary.simpleMessage("Select a Rider"),
         "sellerProfile": MessageLookupByLibrary.simpleMessage("Seller Profile"),
         "sellerSupport": MessageLookupByLibrary.simpleMessage("Seller Support"),
+        "service": MessageLookupByLibrary.simpleMessage("Service"),
+        "serviceschedule":
+            MessageLookupByLibrary.simpleMessage("Service Schedule"),
         "shippingInfo": MessageLookupByLibrary.simpleMessage("Shipping Info"),
         "shopDetails": MessageLookupByLibrary.simpleMessage("Shop Details"),
         "shopLogo": MessageLookupByLibrary.simpleMessage("Shop Logo"),
         "shopName": MessageLookupByLibrary.simpleMessage("Shop Name"),
         "shopOwner": MessageLookupByLibrary.simpleMessage("Shop Owner"),
+        "staffmanageservice":
+            MessageLookupByLibrary.simpleMessage("Manage Service"),
         "storeAccount": MessageLookupByLibrary.simpleMessage("Store Account"),
         "submit": MessageLookupByLibrary.simpleMessage("Submit"),
         "termsconditions":

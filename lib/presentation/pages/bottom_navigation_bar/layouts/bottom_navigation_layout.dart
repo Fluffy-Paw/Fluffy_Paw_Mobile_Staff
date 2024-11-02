@@ -6,6 +6,7 @@ import 'package:fluffypawsm/presentation/pages/dashboard/dashboard_view.dart';
 import 'package:fluffypawsm/presentation/pages/dashboard/layouts/dashboard_layout.dart';
 import 'package:fluffypawsm/presentation/pages/order/order_view.dart';
 import 'package:fluffypawsm/presentation/pages/profile/profile_view.dart';
+import 'package:fluffypawsm/presentation/pages/services/service_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -50,7 +51,7 @@ class _BottomNavigationLayoutState
         children: const [
           DashboardView(),
           OrderView(),
-          ProfileView(),
+          ServiceView(),
           ProfileView(),
         ],
       ),

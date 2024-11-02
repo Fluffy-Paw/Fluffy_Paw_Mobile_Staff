@@ -107,6 +107,8 @@ class $AssetsSvgGen {
 
   /// File path: assets/svg/total_doller.svg
   String get totalDoller => 'assets/svg/total_doller.svg';
+  String get done => 'assets/svg/done.svg';
+  String get edit => 'assets/svg/edit.svg';
   
 
   /// List of all assets
@@ -134,7 +136,7 @@ class $AssetsSvgGen {
         summeryOngoingOrder,
         sun,
         termsConditions,
-        totalDoller
+        totalDoller,done,edit
       ];
 }
 
@@ -143,7 +145,7 @@ class Assets {
 
   static const $AssetsGifGen gif = $AssetsGifGen();
   static const $AssetsImageGen image = $AssetsImageGen();
-  static const $AssetsSvgGen svg = $AssetsSvgGen();
+ static const $AssetsSvgGen svg = $AssetsSvgGen();
 }
 
 class AssetGenImage {
