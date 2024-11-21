@@ -5,7 +5,9 @@ import 'package:fluffypawsm/core/utils/context_less_navigation.dart';
 import 'package:fluffypawsm/core/utils/global_function.dart';
 import 'package:fluffypawsm/data/controller/order_controller.dart';
 import 'package:fluffypawsm/data/models/dashboard/dashboard_model.dart';
+import 'package:fluffypawsm/dependency_injection/dependency_injection.dart';
 import 'package:fluffypawsm/presentation/pages/order/components/order_status_card.dart';
+import 'package:fluffypawsm/presentation/pages/tracking/tracking_screen.dart';
 import 'package:fluffypawsm/presentation/widgets/component/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,7 +37,6 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
 
   @override
   Widget build(BuildContext context) {
-    // Vẫn giữ nguyên layout gốc nhưng thay đổi data source
     final isDark = Theme.of(context).scaffoldBackgroundColor == AppColor.blackColor;
     return Scaffold(
       backgroundColor: isDark ? AppColor.blackColor : AppColor.offWhiteColor,
@@ -47,7 +48,7 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
           Padding(
             padding: EdgeInsets.symmetric(vertical: 22.h).copyWith(right: 20.w),
             child: OrderStatusCard(
-              orderStatus: widget.order.status, // Dùng status từ Order mới
+              orderStatus: widget.order.status,
             ),
           )
         ],
@@ -67,6 +68,7 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
                 _buildHeaderWidget(context: context),
                 _buildShippingInfoCard(context: context),
                 _buildCustomerInfoCardWidget(context: context),
+                _buildCheckInOutStatus(context: context), // Thêm widget mới
                 _buildItemCardWidget(context: context),
               ],
             ),
@@ -75,7 +77,100 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
       ),
     );
   }
+  Widget _buildCheckInOutStatus({required BuildContext context}) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      margin: EdgeInsets.symmetric(horizontal: 20.w).copyWith(top: 10.h),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColor.whiteColor,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Check-in/out Status:',
+            style: AppTextStyle(context).bodyTextSmall.copyWith(
+                color: AppColor.blackColor, fontWeight: FontWeight.w700),
+          ),
+          Gap(10.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildStatusItem(
+                context: context,
+                title: 'Check-in',
+                isCompleted: widget.order.checkin,
+              ),
+              Container(
+                height: 40.h,
+                width: 1,
+                color: AppColor.blackColor.withOpacity(0.1),
+              ),
+              _buildStatusItem(
+                context: context,
+                title: 'Check-out',
+                isCompleted: widget.order.checkout,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusItem({
+    required BuildContext context,
+    required String title,
+    required bool isCompleted,
+  }) {
+    return Column(
+      children: [
+        Icon(
+          isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
+          color: isCompleted ? AppColor.greenCheckin : AppColor.gray,
+          size: 24.sp,
+        ),
+        Gap(5.h),
+        Text(
+          title,
+          style: AppTextStyle(context).bodyTextSmall.copyWith(
+            color: isCompleted ? AppColor.greenCheckin : AppColor.gray,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
   Widget _buildBottomWidget(BuildContext context) {
+    // Nếu đã check-in và status là 'Accepted', hiển thị nút Tracking
+    if (widget.order.checkin && widget.order.status == 'Accepted') {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: CustomButton(
+        buttonText: 'Track Order',
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TrackingScreen(
+                bookingId: widget.order.id,
+              ),
+            ),
+          ).then((_) {
+            // Optional: Refresh order data when returning from tracking screen
+            ref.read(orderController.notifier).getOrderListWithFilter(
+              ref.read(selectedOrderStatus),
+            );
+          });
+        },
+      ),
+    );
+  }
+    
+    // Nếu status là Pending, giữ nguyên logic cũ
     if (widget.order.status == 'Pending') {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
@@ -91,28 +186,25 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: InkWell(
-                  onTap: () async{
-                    // Xử lý cancel
+                  onTap: () async {
                     final result = await ref
-                      .read(orderController.notifier)
-                      .deniedBooking(widget.order.id);
-                  
-                  if (result) {
-                    if (mounted) {
-                      // Show success message
+                        .read(orderController.notifier)
+                        .deniedBooking(widget.order.id);
+                    
+                    if (result) {
+                      if (mounted) {
+                        GlobalFunction.showCustomSnackbar(
+                          message: 'Order has been denied successfully',
+                          isSuccess: true,
+                        );
+                        context.nav.pop();
+                      }
+                    } else {
                       GlobalFunction.showCustomSnackbar(
-                        message: 'Order has been denied successfully',
-                        isSuccess: true,
+                        message: 'Failed to deny order',
+                        isSuccess: false,
                       );
-                      // Navigate back
-                      context.nav.pop();
                     }
-                  } else {
-                    GlobalFunction.showCustomSnackbar(
-                      message: 'Failed to deny order',
-                      isSuccess: false,
-                    );
-                  }
                   },
                   borderRadius: BorderRadius.circular(100),
                   child: SizedBox(
@@ -132,31 +224,28 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
               flex: 5,
               child: CustomButton(
                 buttonText: S.of(context).accepAndAssignRider,
-                onPressed: ref.watch(orderController) 
-                  ? null 
-                  : () async {
-                      final result = await ref
-                          .read(orderController.notifier)
-                          .acceptBooking(widget.order.id);
-                      
-                      if (result) {
-                        if (mounted) {
-                          // Show success message
+                onPressed: ref.watch(orderController)
+                    ? null
+                    : () async {
+                        final result = await ref
+                            .read(orderController.notifier)
+                            .acceptBooking(widget.order.id);
+                        
+                        if (result) {
+                          if (mounted) {
+                            GlobalFunction.showCustomSnackbar(
+                              message: 'Order has been accepted successfully',
+                              isSuccess: true,
+                            );
+                            context.nav.pop();
+                          }
+                        } else {
                           GlobalFunction.showCustomSnackbar(
-                            message: 'Order has been accepted successfully',
-                            isSuccess: true,
+                            message: 'Failed to accept order',
+                            isSuccess: false,
                           );
-                          // Navigate back
-                          context.nav.pop();
                         }
-                      } else {
-                        GlobalFunction.showCustomSnackbar(
-                          message: 'Failed to accept order',
-                          isSuccess: false,
-                        );
-                      }
-                    },
-              
+                      },
               ),
             ),
           ],

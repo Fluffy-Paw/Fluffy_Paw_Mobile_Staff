@@ -210,6 +210,8 @@ class Order {
   final String serviceName;
   final DateTime createDate;
   final DateTime startTime;
+  final bool checkin;
+  final bool checkout;
   final String status;
   final String paymentMethod;
   final int cost; 
@@ -221,6 +223,8 @@ class Order {
     required this.serviceName,
     required this.createDate,
     required this.startTime,
+    required this.checkin,
+    required this.checkout,
     required this.status,
     required this.cost, 
     required this.paymentMethod
@@ -236,7 +240,9 @@ class Order {
       'startTime': startTime.toIso8601String(),
       'status': status,
       'cost': cost, 
-      'paymentMethod': paymentMethod
+      'paymentMethod': paymentMethod,
+      'checkin': checkin,
+      'checkOut': checkout,
     };
   }
 
@@ -251,6 +257,8 @@ class Order {
       status: map['status'] as String,
       paymentMethod: map['paymentMethod'] as String,
       cost: map['cost'] as int, // Ánh xạ trường cost từ response JSON
+      checkin: map['checkin'] as bool,
+      checkout: map['checkOut'] as bool,
     );
   }
 }

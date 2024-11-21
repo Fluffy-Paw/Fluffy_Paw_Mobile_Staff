@@ -23,6 +23,7 @@ final orderIdProvider = StateProvider<int>((ref) => 0);
 final selectedIndexProvider = StateProvider<int>((ref) => 0);
 final selectedDateFilter = StateProvider<String>((ref) => '');
 final selectedDate = StateProvider<DateTime?>((ref) => null);
+final orderCountsProvider = StateProvider<Map<String, int>>((ref) => {});
 final riderIdProvider = StateProvider<int>((ref) => 0);
 final bottomTabControllerProvider =
 Provider<PageController>((ref) => PageController());
@@ -78,8 +79,8 @@ final ridersFormKey = Provider<GlobalKey<FormBuilderState>>(
     (ref) => GlobalKey<FormBuilderState>());
 final activeOrderTab = StateProvider<int>((ref) => 0);
 final selectedOrderStatus = StateProvider<String>((ref) => 'Pending');
-final orderController =
-StateNotifierProvider<OrderController, bool>((ref) => OrderController(ref));
+// final orderController =
+// StateNotifierProvider<OrderController, bool>((ref) => OrderController(ref));
 
 
 
