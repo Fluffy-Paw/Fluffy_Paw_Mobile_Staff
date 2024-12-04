@@ -23,14 +23,15 @@ class $AssetsGifGen {
 class $AssetsImageGen {
   const $AssetsImageGen();
 
+  /// File path: assets/image/alert.png
+  AssetGenImage get alert => const AssetGenImage('assets/image/alert.png');
+
   /// File path: assets/image/question.png
   AssetGenImage get question =>
       const AssetGenImage('assets/image/question.png');
-  AssetGenImage get alert =>
-      const AssetGenImage('assets/image/alert.png');
 
   /// List of all assets
-  List<AssetGenImage> get values => [question, alert];
+  List<AssetGenImage> get values => [alert, question];
 }
 
 class $AssetsSvgGen {
@@ -51,14 +52,27 @@ class $AssetsSvgGen {
   /// File path: assets/svg/bag.svg
   String get bag => 'assets/svg/bag.svg';
 
+  /// File path: assets/svg/communications_active.svg
+  String get communicationsActive => 'assets/svg/communications_active.svg';
+
+  /// File path: assets/svg/communications_notactive.svg
+  String get communicationsNotactive =>
+      'assets/svg/communications_notactive.svg';
+
   /// File path: assets/svg/dashboard.svg
   String get dashboard => 'assets/svg/dashboard.svg';
 
   /// File path: assets/svg/doller.svg
   String get doller => 'assets/svg/doller.svg';
 
+  /// File path: assets/svg/done.svg
+  String get done => 'assets/svg/done.svg';
+
   /// File path: assets/svg/earning_history.svg
   String get earningHistory => 'assets/svg/earning_history.svg';
+
+  /// File path: assets/svg/edit.svg
+  String get edit => 'assets/svg/edit.svg';
 
   /// File path: assets/svg/fluffy_paw_darl.svg
   String get fluffyPawDarl => 'assets/svg/fluffy_paw_darl.svg';
@@ -107,9 +121,6 @@ class $AssetsSvgGen {
 
   /// File path: assets/svg/total_doller.svg
   String get totalDoller => 'assets/svg/total_doller.svg';
-  String get done => 'assets/svg/done.svg';
-  String get edit => 'assets/svg/edit.svg';
-  
 
   /// List of all assets
   List<String> get values => [
@@ -118,9 +129,13 @@ class $AssetsSvgGen {
         activeProfile,
         activeRider,
         bag,
+        communicationsActive,
+        communicationsNotactive,
         dashboard,
         doller,
+        done,
         earningHistory,
+        edit,
         fluffyPawDarl,
         fluffypawLogo,
         language,
@@ -136,7 +151,7 @@ class $AssetsSvgGen {
         summeryOngoingOrder,
         sun,
         termsConditions,
-        totalDoller,done,edit
+        totalDoller
       ];
 }
 
@@ -145,7 +160,7 @@ class Assets {
 
   static const $AssetsGifGen gif = $AssetsGifGen();
   static const $AssetsImageGen image = $AssetsImageGen();
- static const $AssetsSvgGen svg = $AssetsSvgGen();
+  static const $AssetsSvgGen svg = $AssetsSvgGen();
 }
 
 class AssetGenImage {

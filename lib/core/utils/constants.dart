@@ -12,6 +12,13 @@ class AppConstants {
   static const String updateStoreService = '$baseUrl/api/Staff/UpdateStoreService';
   static const String deleteStoreService = '$baseUrl/api/Staff/DeleteStoreService';
   static const String getAllStoreServiceByServiceId = '$baseUrl/api/Staff/GetAllStoreServiceByServiceId';
+  //Chat
+  static const String getAllConversation='$baseUrl/api/Conversation/GetAllConversation';
+  static const String createConversation='$baseUrl/api/Conversation/CreateConversation';
+  static const String sendMessage='$baseUrl/api/Conversation/SendMessage';
+  static const String getAllConversationMessageByConversationId='$baseUrl/api/Conversation/GetAllConversationMessageByConversationId';
+  
+
 
 
   // Hive Box Names
@@ -19,11 +26,14 @@ class AppConstants {
   static const String authBox = 'fluffyPaw_authBox';
   static const String userBox = 'fluffyPaw_userBox';
   static const String orderStatusBox = 'orderStatusBox';
+  static const String notificationBox = 'notificationBox';
+    static const String conversationBox = 'conversation_box';
 
   // Hive Keys
   static const String appLocal = 'appLocal';
   static const String isDarkTheme = 'isDarkTheme';
   static const String authToken = 'token';
+  static const String recentSearchesKey = 'recent_searches';
 
   // User Variable Names
   static const String userData = 'userData';

@@ -1,4 +1,8 @@
+import 'dart:convert';
+
+import 'package:fluffypawsm/core/auth/hive_service.dart';
 import 'package:fluffypawsm/core/generated/l10n.dart';
+import 'package:fluffypawsm/core/utils/api_client.dart';
 import 'package:fluffypawsm/core/utils/app_color.dart';
 import 'package:fluffypawsm/core/utils/app_text_style.dart';
 import 'package:fluffypawsm/core/utils/context_less_navigation.dart';
@@ -6,6 +10,7 @@ import 'package:fluffypawsm/core/utils/global_function.dart';
 import 'package:fluffypawsm/data/controller/order_controller.dart';
 import 'package:fluffypawsm/data/models/dashboard/dashboard_model.dart';
 import 'package:fluffypawsm/dependency_injection/dependency_injection.dart';
+import 'package:fluffypawsm/presentation/pages/check_in_check_out/checkin_confirmation_screen.dart';
 import 'package:fluffypawsm/presentation/pages/order/components/order_status_card.dart';
 import 'package:fluffypawsm/presentation/pages/tracking/tracking_screen.dart';
 import 'package:fluffypawsm/presentation/widgets/component/custom_button.dart';
@@ -15,7 +20,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class OrderDetailsLayout extends ConsumerStatefulWidget {
   final Order order;
@@ -27,9 +33,10 @@ class OrderDetailsLayout extends ConsumerStatefulWidget {
   @override
   ConsumerState<OrderDetailsLayout> createState() => _OrderDetailsLayoutState();
 }
+
 class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
   // final Order order;
-  
+
   // const OrderDetailsLayout({
   //   Key? key,
   //   required this.order,
@@ -37,7 +44,8 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).scaffoldBackgroundColor == AppColor.blackColor;
+    final isDark =
+        Theme.of(context).scaffoldBackgroundColor == AppColor.blackColor;
     return Scaffold(
       backgroundColor: isDark ? AppColor.blackColor : AppColor.offWhiteColor,
       appBar: AppBar(
@@ -61,8 +69,7 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
             children: AnimationConfiguration.toStaggeredList(
               duration: const Duration(milliseconds: 500),
               childAnimationBuilder: (widget) => SlideAnimation(
-                  verticalOffset: 50.0,
-                  child: FadeInAnimation(child: widget)),
+                  verticalOffset: 50.0, child: FadeInAnimation(child: widget)),
               children: [
                 Gap(2.h),
                 _buildHeaderWidget(context: context),
@@ -77,6 +84,7 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
       ),
     );
   }
+
   Widget _buildCheckInOutStatus({required BuildContext context}) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
@@ -136,41 +144,16 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
         Text(
           title,
           style: AppTextStyle(context).bodyTextSmall.copyWith(
-            color: isCompleted ? AppColor.greenCheckin : AppColor.gray,
-            fontWeight: FontWeight.w500,
-          ),
+                color: isCompleted ? AppColor.greenCheckin : AppColor.gray,
+                fontWeight: FontWeight.w500,
+              ),
         ),
       ],
     );
   }
+
   Widget _buildBottomWidget(BuildContext context) {
-    // Nếu đã check-in và status là 'Accepted', hiển thị nút Tracking
-    if (widget.order.checkin && widget.order.status == 'Accepted') {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: CustomButton(
-        buttonText: 'Track Order',
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TrackingScreen(
-                bookingId: widget.order.id,
-              ),
-            ),
-          ).then((_) {
-            // Optional: Refresh order data when returning from tracking screen
-            ref.read(orderController.notifier).getOrderListWithFilter(
-              ref.read(selectedOrderStatus),
-            );
-          });
-        },
-      ),
-    );
-  }
-    
-    // Nếu status là Pending, giữ nguyên logic cũ
+    // Case 1: Pending Order - Show Accept/Deny buttons
     if (widget.order.status == 'Pending') {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
@@ -190,7 +173,7 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
                     final result = await ref
                         .read(orderController.notifier)
                         .deniedBooking(widget.order.id);
-                    
+
                     if (result) {
                       if (mounted) {
                         GlobalFunction.showCustomSnackbar(
@@ -220,6 +203,7 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
                 ),
               ),
             ),
+            Gap(12.w),
             Flexible(
               flex: 5,
               child: CustomButton(
@@ -230,7 +214,7 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
                         final result = await ref
                             .read(orderController.notifier)
                             .acceptBooking(widget.order.id);
-                        
+
                         if (result) {
                           if (mounted) {
                             GlobalFunction.showCustomSnackbar(
@@ -252,7 +236,389 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
         ),
       );
     }
+
+    // Case 2: Accepted Order but not checked in
+    if (widget.order.status == 'Accepted' && !widget.order.checkin) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: CustomButton(
+          buttonText: 'Check-in',
+          onPressed: () => _showQRScanner(),
+        ),
+      );
+    }
+
+    // Case 3: Show checkout for both active and ended orders if not checked out
+    if ((widget.order.status == 'Accepted' || widget.order.status == 'Ended') &&
+        widget.order.checkin &&
+        !widget.order.checkout) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: Row(
+          children: [
+            Expanded(
+              child: CustomButton(
+                buttonText: 'Check-out',
+                onPressed: widget.order.status == 'Accepted'
+                    ? () => _showQRScanner()
+                    : null,
+                // Disable the button if status is not 'Ended'
+              ),
+            ),
+            Gap(12.w),
+            Expanded(
+              child: CustomButton(
+                buttonText: 'Track Order',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TrackingScreen(
+                        bookingId: widget.order.id,
+                      ),
+                    ),
+                  ).then((_) {
+                    ref.read(orderController.notifier).getOrderListWithFilter(
+                          ref.read(selectedOrderStatus),
+                        );
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Case 4: If order is checked out, only show tracking
+    if ((widget.order.status == 'Accepted' || widget.order.status == 'Ended') &&
+        widget.order.checkout) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: CustomButton(
+          buttonText: 'Track Order',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TrackingScreen(
+                  bookingId: widget.order.id,
+                ),
+              ),
+            ).then((_) {
+              ref.read(orderController.notifier).getOrderListWithFilter(
+                    ref.read(selectedOrderStatus),
+                  );
+            });
+          },
+        ),
+      );
+    }
+
     return const SizedBox.shrink();
+  }
+
+  Future<void> _showQRScanner() async {
+    final status = await Permission.camera.request();
+    if (status.isDenied) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Cần quyền truy cập camera để quét mã QR')),
+        );
+      }
+      return;
+    }
+
+    _cameraController?.dispose();
+    _cameraController = MobileScannerController(
+      facing: CameraFacing.back,
+      detectionSpeed: DetectionSpeed.normal,
+      returnImage: false,
+    );
+
+    if (mounted) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        isDismissible: true,
+        enableDrag: false,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setState) => Container(
+            height: MediaQuery.of(context).size.height * 0.8,
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                  decoration: BoxDecoration(
+                    color: AppColor.violetColor,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(24.r)),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 40.w,
+                        height: 4.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
+                      ),
+                      Gap(16.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.close, color: Colors.white),
+                            onPressed: () {
+                              _cameraController?.dispose();
+                              Navigator.pop(context);
+                            },
+                          ),
+                          Text(
+                            widget.order.checkin
+                                ? 'Scan to Check-out'
+                                : 'Scan to Check-in',
+                            style: AppTextStyle(context).title.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              _isFlashOn ? Icons.flash_on : Icons.flash_off,
+                              color: Colors.white,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isFlashOn = !_isFlashOn;
+                                _cameraController?.toggleTorch();
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      if (_cameraController != null)
+                        MobileScanner(
+                          controller: _cameraController!,
+                          onDetect: (capture) {
+                            final List<Barcode> barcodes = capture.barcodes;
+                            if (barcodes.isNotEmpty) {
+                              final qrData = barcodes.first.rawValue;
+                              if (qrData != null) {
+                                _handleQRData(qrData);
+                              }
+                            }
+                          },
+                        ),
+                      Center(
+                        child: Container(
+                          width: 200.w,
+                          height: 200.w,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: AppColor.violetColor,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleQRData(String qrData) async {
+    try {
+      final qrContent = jsonDecode(qrData);
+      if (qrContent['requiresStaffAuth'] == true) {
+        // Close QR scanner first
+        _cameraController?.stop();
+        Navigator.pop(context);
+
+        // Check if it's a checkout operation by looking at the URL
+        final bool isCheckout =
+            qrContent['url'].toString().toLowerCase().contains('checkout');
+
+        // Navigate to confirmation screen
+        final result = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CheckinConfirmationScreen(
+              orderId: widget.order.id,
+              apiUrl: qrContent['url'] as String,
+              requestData: qrContent['data'] as Map<String, dynamic>,
+              isCheckout:
+                  isCheckout, // Pass the correct flag based on the operation
+            ),
+          ),
+        );
+
+        // If check-in/out was successful, refresh the data
+        if (result == true) {
+          await ref.read(orderController.notifier).getOrderListWithFilter(
+                ref.read(selectedOrderStatus),
+              );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Có lỗi xảy ra: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.all(20.w),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showSuccessAnimation(bool isCheckin) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => TweenAnimationBuilder(
+        tween: Tween<double>(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 500),
+        builder: (context, double value, child) {
+          return Transform.scale(
+            scale: value,
+            child: Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Container(
+                padding: EdgeInsets.all(24.w),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TweenAnimationBuilder(
+                      tween: Tween<double>(begin: 0.0, end: 1.0),
+                      duration: const Duration(milliseconds: 800),
+                      builder: (context, double value, child) {
+                        return Transform.scale(
+                          scale: value,
+                          child: Container(
+                            width: 80.w,
+                            height: 80.w,
+                            decoration: BoxDecoration(
+                              color: AppColor.violetColor.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              isCheckin ? Icons.login : Icons.logout,
+                              color: AppColor.violetColor,
+                              size: 40.sp,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    Gap(16.h),
+                    Text(
+                      isCheckin
+                          ? 'Check-in successful!'
+                          : 'Check-out successful!',
+                      style: AppTextStyle(context).title.copyWith(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColor.violetColor,
+                          ),
+                    ),
+                    Gap(8.h),
+                    Text(
+                      'Operation has been processed',
+                      style: AppTextStyle(context).bodyTextSmall.copyWith(
+                            color: Colors.grey,
+                          ),
+                    ),
+                    Gap(24.h),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close dialog
+                          Navigator.of(context).pop(); // Return to order detail
+                          // Refresh the order detail page
+                          setState(() {});
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColor.violetColor,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        child: Text(
+                          'Close',
+                          style: AppTextStyle(context).buttonText.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ).then((_) {
+      // Auto close after 2 seconds
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted && Navigator.canPop(context)) {
+          Navigator.pop(context);
+          // Refresh order detail
+          setState(() {});
+        }
+      });
+    });
+  }
+
+// Add these properties to the state class
+  MobileScannerController? _cameraController;
+  bool _isFlashOn = false;
+
+  @override
+  void dispose() {
+    _cameraController?.dispose();
+    super.dispose();
   }
 
   Widget _buildHeaderWidget({required BuildContext context}) {
@@ -275,7 +641,8 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
                   ),
                   Gap(5.w),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
                     decoration: BoxDecoration(
                       color: AppColor.blackColor.withOpacity(0.8),
                       borderRadius: BorderRadius.circular(8.r),
@@ -291,7 +658,8 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
               ),
               Gap(5.h),
               Text(
-                DateFormat("d MMM, y - hh:mm a").format(widget.order.createDate),
+                DateFormat("d MMM, y - hh:mm a")
+                    .format(widget.order.createDate),
                 style: AppTextStyle(context).bodyTextSmall.copyWith(
                     fontSize: 12.sp,
                     color: AppColor.blackColor.withOpacity(0.8),
@@ -342,6 +710,7 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
       ),
     );
   }
+
   Container _buildInfoDateCardWidget({required BuildContext context}) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
@@ -418,7 +787,7 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
                     Text(
                       // Delivery date mặc định = startTime + 2 ngày
                       DateFormat("d MMM, y").format(
-                        widget.order.startTime.add(const Duration(days: 2)),
+                        widget.order.endDate,
                       ),
                       style: AppTextStyle(context).bodyTextSmall.copyWith(
                           color: AppColor.blackColor,

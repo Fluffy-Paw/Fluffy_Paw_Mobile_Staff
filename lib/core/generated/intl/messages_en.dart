@@ -85,6 +85,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "gender": MessageLookupByLibrary.simpleMessage("Gender"),
         "header": MessageLookupByLibrary.simpleMessage("Staff"),
         "inActive": MessageLookupByLibrary.simpleMessage("Inactive"),
+        "inbox": MessageLookupByLibrary.simpleMessage("Inbox"),
         "invoiceDownloaded": MessageLookupByLibrary.simpleMessage(
             "Invoice Downloaded Successfully"),
         "items": MessageLookupByLibrary.simpleMessage("Items"),
@@ -115,7 +116,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("No order found!"),
         "orderPrefixCode":
             MessageLookupByLibrary.simpleMessage("Order Prefix Code"),
-        "orders": MessageLookupByLibrary.simpleMessage("Orders"),
+        "orders": MessageLookupByLibrary.simpleMessage("Booking"),
         "otpDes":
             MessageLookupByLibrary.simpleMessage("We have send OTP code to"),
         "overTime": MessageLookupByLibrary.simpleMessage("OverTime"),
@@ -134,7 +135,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "register": MessageLookupByLibrary.simpleMessage("Register"),
         "registration": MessageLookupByLibrary.simpleMessage("Registration"),
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
-        "riders": MessageLookupByLibrary.simpleMessage("Riders"),
+        "riders": MessageLookupByLibrary.simpleMessage("Service"),
         "searchByName":
             MessageLookupByLibrary.simpleMessage("Search by name/phone"),
         "seeAll": MessageLookupByLibrary.simpleMessage("See All"),

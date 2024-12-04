@@ -212,6 +212,7 @@ class Order {
   final DateTime startTime;
   final bool checkin;
   final bool checkout;
+  final DateTime endDate; 
   final String status;
   final String paymentMethod;
   final int cost; 
@@ -227,7 +228,8 @@ class Order {
     required this.checkout,
     required this.status,
     required this.cost, 
-    required this.paymentMethod
+    required this.paymentMethod,
+    required this.endDate
   });
 
   Map<String, dynamic> toMap() {
@@ -243,6 +245,7 @@ class Order {
       'paymentMethod': paymentMethod,
       'checkin': checkin,
       'checkOut': checkout,
+      'endTime':endDate
     };
   }
 
@@ -259,6 +262,8 @@ class Order {
       cost: map['cost'] as int, // Ánh xạ trường cost từ response JSON
       checkin: map['checkin'] as bool,
       checkout: map['checkOut'] as bool,
+      endDate: DateTime.parse(map['endTime'] as String),
+
     );
   }
 }

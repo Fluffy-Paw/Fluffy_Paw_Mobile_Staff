@@ -380,20 +380,20 @@ class S {
     );
   }
 
-  /// `Orders`
+  /// `Booking`
   String get orders {
     return Intl.message(
-      'Orders',
+      'Booking',
       name: 'orders',
       desc: '',
       args: [],
     );
   }
 
-  /// `Riders`
+  /// `Service`
   String get riders {
     return Intl.message(
-      'Riders',
+      'Service',
       name: 'riders',
       desc: '',
       args: [],
@@ -1245,6 +1245,16 @@ class S {
     return Intl.message(
       'Service',
       name: 'service',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Inbox`
+  String get inbox {
+    return Intl.message(
+      'Inbox',
+      name: 'inbox',
       desc: '',
       args: [],
     );

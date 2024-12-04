@@ -86,6 +86,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "gender": MessageLookupByLibrary.simpleMessage("Giới tính"),
         "header": MessageLookupByLibrary.simpleMessage("Nhân Viên"),
         "inActive": MessageLookupByLibrary.simpleMessage("Không hoạt động"),
+        "inbox": MessageLookupByLibrary.simpleMessage("Tin nhắn"),
         "invoiceDownloaded": MessageLookupByLibrary.simpleMessage(
             "Hóa đơn đã được tải xuống thành công"),
         "items": MessageLookupByLibrary.simpleMessage("Mặt hàng"),
@@ -141,7 +142,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "register": MessageLookupByLibrary.simpleMessage("Đăng ký"),
         "registration": MessageLookupByLibrary.simpleMessage("Đăng ký"),
         "reset": MessageLookupByLibrary.simpleMessage("Đặt lại"),
-        "riders": MessageLookupByLibrary.simpleMessage("Tài xế"),
+        "riders": MessageLookupByLibrary.simpleMessage("Dịch vụ"),
         "searchByName": MessageLookupByLibrary.simpleMessage(
             "Tìm kiếm theo tên/số điện thoại"),
         "seeAll": MessageLookupByLibrary.simpleMessage("Xem tất cả"),

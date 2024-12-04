@@ -2,6 +2,7 @@ import 'package:fluffypawsm/core/gen/assets.gen.dart';
 import 'package:fluffypawsm/core/generated/l10n.dart';
 import 'package:fluffypawsm/dependency_injection/dependency_injection.dart';
 import 'package:fluffypawsm/presentation/pages/bottom_navigation_bar/components/app_bottom_navbar.dart';
+import 'package:fluffypawsm/presentation/pages/conversation/layout/conversation_list_layout.dart';
 import 'package:fluffypawsm/presentation/pages/dashboard/dashboard_view.dart';
 import 'package:fluffypawsm/presentation/pages/dashboard/layouts/dashboard_layout.dart';
 import 'package:fluffypawsm/presentation/pages/order/order_view.dart';
@@ -52,6 +53,7 @@ class _BottomNavigationLayoutState
           DashboardView(),
           OrderView(),
           ServiceView(),
+          ConversationScreen(),
           ProfileView(),
         ],
       ),
@@ -74,6 +76,11 @@ class _BottomNavigationLayoutState
         icon: Assets.svg.rider,
         activeIcon: Assets.svg.activeRider,
         name: S.of(context).riders,
+      ),
+      BottomItem(
+        icon: Assets.svg.communicationsNotactive,
+        activeIcon: Assets.svg.communicationsActive,
+        name: S.of(context).inbox,
       ),
       BottomItem(
         icon: Assets.svg.profile,

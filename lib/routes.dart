@@ -5,6 +5,7 @@ import 'package:fluffypawsm/presentation/pages/bottom_navigation_bar/bottom_navi
 import 'package:fluffypawsm/presentation/pages/bottom_navigation_bar/layouts/bottom_navigation_layout.dart';
 import 'package:fluffypawsm/presentation/pages/dashboard/dashboard_view.dart';
 import 'package:fluffypawsm/presentation/pages/dashboard/layouts/dashboard_layout.dart';
+import 'package:fluffypawsm/presentation/pages/notification/notification_view.dart';
 import 'package:fluffypawsm/presentation/pages/order/order_details_view.dart';
 import 'package:fluffypawsm/presentation/pages/profile/seller_account_view.dart';
 import 'package:fluffypawsm/presentation/pages/services/create_store_service_view.dart';
@@ -24,6 +25,7 @@ class Routes{
   static const orderDetailsView ='/orderDetails';
   static const serviceDetails = '/serviceDetails';
   static const createStoreService = '/createStoreService';
+  static const notification="/notification";
 }
 class StoreServiceRouteArgs {
   final int serviceId;
@@ -44,6 +46,8 @@ Route generatedRoutes(RouteSettings settings){
     case Routes.splash:
       child = const SplashView();
       break;
+    case Routes.notification:
+      child = const NotificationView();
     case Routes.login:
       child = const LoginView();
       break;

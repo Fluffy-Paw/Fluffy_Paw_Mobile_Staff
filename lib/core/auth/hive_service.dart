@@ -1,4 +1,5 @@
 import 'package:fluffypawsm/core/utils/constants.dart';
+import 'package:fluffypawsm/data/models/conversation/conversation_model.dart';
 import 'package:fluffypawsm/data/models/profile/profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -21,6 +22,19 @@ class HiveService {
 
     if (authToken != null) {
       return authToken;
+    }
+    return null;
+  }
+  Future<void> saveRecentSearches(List<String> searches) async {
+    final box = await Hive.openBox('appBox');
+    await box.put(AppConstants.recentSearchesKey, searches);
+  }
+
+  Future<List<String>?> getRecentSearches() async {
+    final box = await Hive.openBox('appBox');
+    final searches = box.get(AppConstants.recentSearchesKey);
+    if (searches is List) {
+      return searches.cast<String>();
     }
     return null;
   }
@@ -98,6 +112,32 @@ class HiveService {
   Future<void> updateOrderStatus(String status, int newCount) async {
     final orderStatusBox = await Hive.openBox(AppConstants.orderStatusBox);
     orderStatusBox.put(status, newCount);
+  }
+  Future<void> saveConversations({
+    required List<ConversationModel> conversations,
+  }) async {
+    final conversationBox = await Hive.openBox<dynamic>(AppConstants.conversationBox);
+    
+    // Store only essential metadata
+    final conversationData = conversations.map((conv) => {
+      'id': conv.id,
+      'poAccountId': conv.poAccountId,
+      'lastMessage': conv.lastMessage,
+      'timeSinceLastMessage': conv.timeSinceLastMessage,
+      'poName': conv.poName,
+      'poAvatar': conv.poAvatar,
+    }).toList();
+    
+    await conversationBox.put('conversations', conversationData);
+  }
+
+  Future<List<ConversationModel>?> getConversations() async {
+    final conversationBox = await Hive.openBox<dynamic>(AppConstants.conversationBox);
+    final data = conversationBox.get('conversations') as List?;
+    
+    if (data == null) return null;
+    
+    return data.map((item) => ConversationModel.fromMap(Map<String, dynamic>.from(item))).toList();
   }
 }
 

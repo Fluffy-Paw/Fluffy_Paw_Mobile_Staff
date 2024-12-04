@@ -34,7 +34,7 @@
   "submit": "Gửi",
   "dashboard": "Bảng điều khiển",
   "orders": "Đơn hàng",
-  "riders": "Tài xế",
+  "riders": "Dịch vụ",
   "profile": "Hồ sơ",
   "wellDone": "Tốt lắm!",
   "underReviewDes": "Đăng ký của bạn đã được hoàn tất thành công. Vui lòng đợi phê duyệt.",
@@ -120,5 +120,6 @@
   "staffmanageservice": "Quản lý dịch vụ chi nhánh",
   "createnewschedule": "Tạo thời gian mới",
   "serviceschedule": "Lịch trình",
-  "service": "Dịch Vụ"
+  "service": "Dịch Vụ",
+  "inbox": "Tin nhắn"
 }

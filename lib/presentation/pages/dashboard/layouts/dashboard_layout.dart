@@ -7,9 +7,11 @@ import 'package:fluffypawsm/core/utils/app_text_style.dart';
 import 'package:fluffypawsm/core/utils/global_function.dart';
 import 'package:fluffypawsm/data/controller/dashboard_controller.dart';
 import 'package:fluffypawsm/data/controller/order_controller.dart';
+import 'package:fluffypawsm/dependency_injection/dependency_injection.dart';
 import 'package:fluffypawsm/presentation/pages/dashboard/components/pending_order_card.dart';
 import 'package:fluffypawsm/presentation/pages/dashboard/components/summery_card.dart';
 import 'package:fluffypawsm/presentation/widgets/component/home_shimmer.dart';
+import 'package:fluffypawsm/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,43 +39,44 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
       ref.read(orderController.notifier).getOrderListWithFilter('Pending');
     });
   }
+
   @override
   Widget build(BuildContext context) {
-
-    final pendingOrder = ref.watch(orderController.notifier).dashboard?.orders ?? [];
+    final pendingOrder =
+        ref.watch(orderController.notifier).dashboard?.orders ?? [];
     return Scaffold(
       backgroundColor:
-      Theme.of(context).scaffoldBackgroundColor == AppColor.blackColor
-          ? AppColor.blackColor
-          : AppColor.offWhiteColor,
+          Theme.of(context).scaffoldBackgroundColor == AppColor.blackColor
+              ? AppColor.blackColor
+              : AppColor.offWhiteColor,
       body: ref.watch(dashboardController)
           ? const ShimmerWidget()
           : Stack(
-        children: [
-          Column(
-            children: [
-              Flexible(
-                flex: 3,
-                child: _buildAppBar(context: context),
-              ),
-              SizedBox(height: 200.h),
-              Flexible(
-                flex: 6,
-                child: _buildOrderList(context: context),
-              ),
-            ],
-          ),
-          Positioned(
-            top: 134.h,
-            left: 0,
-            right: 0,
-            child: _buildSummeryContainer(context: context),
-          ),
-          // ref.watch(orderStatusController)
-          //     ? _buildLoadingOverlay()
-          //     : const SizedBox(),
-        ],
-      ),
+              children: [
+                Column(
+                  children: [
+                    Flexible(
+                      flex: 3,
+                      child: _buildAppBar(context: context),
+                    ),
+                    SizedBox(height: 200.h),
+                    Flexible(
+                      flex: 6,
+                      child: _buildOrderList(context: context),
+                    ),
+                  ],
+                ),
+                Positioned(
+                  top: 134.h,
+                  left: 0,
+                  right: 0,
+                  child: _buildSummeryContainer(context: context),
+                ),
+                // ref.watch(orderStatusController)
+                //     ? _buildLoadingOverlay()
+                //     : const SizedBox(),
+              ],
+            ),
     );
   }
 
@@ -124,34 +127,38 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
               ),
             ],
           ),
-
-          Stack(
-            children: [
-              CircleAvatar(
-                backgroundColor: AppColor.violetColor.withGreen(75),
-                radius: 25.sp,
-                child: SvgPicture.asset(
-                  Assets.svg.notification,
-                  width: 25.sp,
-                ),
-              ),
-              Positioned(
-                right: 10.w,
-                top: 12.h,
-                child: Container(
-                  height: 12.h,
-                  width: 12.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColor.redColor,
-                    border: Border.all(
-                      width: 1,
-                      color: AppColor.whiteColor,
-                    ),
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, Routes.notification);
+            },
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  backgroundColor: AppColor.violetColor.withGreen(75),
+                  radius: 25.sp,
+                  child: SvgPicture.asset(
+                    Assets.svg.notification,
+                    width: 25.sp,
                   ),
                 ),
-              )
-            ],
+                Positioned(
+                  right: 10.w,
+                  top: 12.h,
+                  child: Container(
+                    height: 12.h,
+                    width: 12.w,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColor.redColor,
+                      border: Border.all(
+                        width: 1,
+                        color: AppColor.whiteColor,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
           )
         ],
       ),
@@ -160,14 +167,14 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
 
   Widget _buildSummeryContainer({required BuildContext context}) {
     final dashboardInfo = ref.read(dashboardController.notifier).dashboard;
-    if (dashboardInfo == null) {
-      return Container();
-    }
+
+    // Always use dashboard info, even if empty
     if (grid.length < 4) {
-      grid.add(dashboardInfo.todayOrders);
-      grid.add(dashboardInfo.processingOrders);
-      grid.add(dashboardInfo.todayEarning);
-      grid.add(dashboardInfo.thisMonthEarnings);
+      grid.clear(); // Clear existing data first
+      grid.add(dashboardInfo?.todayOrders ?? 0);
+      grid.add(dashboardInfo?.processingOrders ?? 0);
+      grid.add(dashboardInfo?.todayEarning ?? "0");
+      grid.add(dashboardInfo?.thisMonthEarnings ?? "0");
     }
 
     return Container(
@@ -222,7 +229,8 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
   }
 
   Widget _buildOrderList({required BuildContext context}) {
-    final pendingOrder = ref.watch(pendingOrdersProvider);
+    // Sử dụng dashboardPendingOrdersProvider thay vì pendingOrdersProvider
+    final pendingOrders = ref.watch(dashboardPendingOrdersProvider);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -249,11 +257,11 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
                           color: AppColor.redColor),
                       child: Center(
                         child: Text(
-                          "${pendingOrder.length}",
+                          "${pendingOrders.length}",
                           style: AppTextStyle(context).bodyText.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: AppColor.whiteColor,
-                          ),
+                                fontWeight: FontWeight.w500,
+                                color: AppColor.whiteColor,
+                              ),
                         ),
                       ),
                     )
@@ -267,9 +275,9 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
                 child: Text(
                   "See All",
                   style: AppTextStyle(context).bodyTextSmall.copyWith(
-                    color: colors(context).primaryColor,
-                    fontWeight: FontWeight.w500,
-                  ),
+                        color: colors(context).primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
               )
             ],
@@ -279,10 +287,12 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
-                await ref.read(orderController.notifier).getOrderListWithFilter('Pending');
+                await ref
+                    .read(orderController.notifier)
+                    .getOrderListWithFilter('Pending');
               },
-              child: pendingOrder.isEmpty
-                  ? ListView( // Wrap empty state in ListView for refresh capability
+              child: pendingOrders.isEmpty
+                  ? ListView(
                       children: [
                         SizedBox(
                           height: MediaQuery.of(context).size.height / 3,
@@ -298,10 +308,10 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
                   : AnimationLimiter(
                       child: ListView.builder(
                         padding: EdgeInsets.only(top: 5.h),
-                        physics: const AlwaysScrollableScrollPhysics(), // Add this
-                        itemCount: pendingOrder.length,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: pendingOrders.length,
                         itemBuilder: (context, index) {
-                          final order = pendingOrder[index];
+                          final order = pendingOrders[index];
                           return AnimationConfiguration.staggeredList(
                             position: index,
                             duration: const Duration(milliseconds: 500),
@@ -321,6 +331,7 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
       ),
     );
   }
+
   List<dynamic> grid = [];
   final List<Map<String, dynamic>> summeryData = [
     {
@@ -344,5 +355,4 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
       "icon": Assets.svg.totalDoller
     },
   ];
-
 }
