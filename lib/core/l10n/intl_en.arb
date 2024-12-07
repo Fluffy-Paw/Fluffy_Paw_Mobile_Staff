@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
   "validationMessage": "field cannot be empty",
-  "loginTitle": "Login to Fluffy Paw Staff Portal",
+  "loginTitle": "Login to Fluffy Paw Merchant Portal",
   "emailOrPhone": "Email Or Phone",
   "password": "Password",
   "login": "Log in",
@@ -128,5 +128,6 @@
   "businessLicense": "Business License",
   "uploadLicense": "Upload License",
   "taxNumber": "Tax Number",
-  "brandEmail": "Brand Email"
+  "brandEmail": "Brand Email",
+  "noServicesAvailable": "No Services Available"
 }

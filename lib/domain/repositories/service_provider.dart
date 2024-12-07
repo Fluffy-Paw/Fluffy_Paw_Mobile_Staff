@@ -9,5 +9,6 @@ abstract class ServiceProvider {
   Future<Response> deleteStoreService(int id);
   Future<Response> getAllStoreService(int storeId);
   Future<Response> getAllStoreServiceByServiceId(int serviceId);
+  Future<Response> getAllServiceByBrandId(int brandId);
   
 }

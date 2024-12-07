@@ -60,6 +60,13 @@ Future<Response> createStoreService({
     );
     return response;
   }
+  @override
+  Future<Response> getAllServiceByBrandId(int brandId) async {
+    final response = await ref.read(apiClientProvider).get(
+      '${AppConstants.getAllServiceByBrandId}/$brandId',
+    );
+    return response;
+  }
 }
 
 final storeServiceProvider = Provider((ref) => ServiceServiceProvider(ref));

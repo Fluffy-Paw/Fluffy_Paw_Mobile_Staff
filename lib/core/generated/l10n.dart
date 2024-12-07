@@ -60,10 +60,10 @@ class S {
     );
   }
 
-  /// `Login to Fluffy Paw Staff Portal`
+  /// `Login to Fluffy Paw Merchant Portal`
   String get loginTitle {
     return Intl.message(
-      'Login to Fluffy Paw Staff Portal',
+      'Login to Fluffy Paw Merchant Portal',
       name: 'loginTitle',
       desc: '',
       args: [],
@@ -1325,6 +1325,16 @@ class S {
     return Intl.message(
       'Brand Email',
       name: 'brandEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No Services Available`
+  String get noServicesAvailable {
+    return Intl.message(
+      'No Services Available',
+      name: 'noServicesAvailable',
       desc: '',
       args: [],
     );

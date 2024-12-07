@@ -52,20 +52,25 @@ class AuthenticationController extends StateNotifier<bool> {
       if (role == "PetOwner") {
         state = false;
         return false; // Nếu role là "PetOwner", trả về false
+      } else if (role == "StoreManager") {
+        state = false;
+        return true;
+      } else {
+        ref.read(hiveStoreService).saveUserAuthToken(authToken: accessToken);
+        ref.read(apiClientProvider).updateToken(token: accessToken);
+        await ref.read(profileController.notifier).getAccountDetails();
+        state = false;
+        return true;
       }
 
       //ref.read(hiveStoreService).saveUserInfo(userInfo: userInfo);
-      ref.read(hiveStoreService).saveUserAuthToken(authToken: accessToken);
-      ref.read(apiClientProvider).updateToken(token: accessToken);
-      await ref.read(profileController.notifier).getAccountDetails();
-      state = false;
-      return true;
     } catch (e) {
       debugPrint(e.toString());
       state = false;
       return false;
     }
   }
+
   Future<bool> registration({
     required SignUpModel signUpModel,
     required XFile businessLicense,
@@ -75,23 +80,23 @@ class AuthenticationController extends StateNotifier<bool> {
   }) async {
     try {
       state = true;
-      
+
       final response = await ref.read(authServiceProvider).registration(
-        userName: signUpModel.userName,
-        fullName: signUpModel.fullName,
-        password: signUpModel.password,
-        confirmPassword: signUpModel.confirmPassword,
-        email: signUpModel.email,
-        name: signUpModel.storeName,
-        mst: signUpModel.mst,
-        address: signUpModel.address,
-        hotline: signUpModel.hotline,
-        brandEmail: signUpModel.brandEmail,
-        businessLicense: businessLicense,
-        front: frontId,
-        back: backId,
-        logo: logo,
-      );
+            userName: signUpModel.userName,
+            fullName: signUpModel.fullName,
+            password: signUpModel.password,
+            confirmPassword: signUpModel.confirmPassword,
+            email: signUpModel.email,
+            name: signUpModel.storeName,
+            mst: signUpModel.mst,
+            address: signUpModel.address,
+            hotline: signUpModel.hotline,
+            brandEmail: signUpModel.brandEmail,
+            businessLicense: businessLicense,
+            front: frontId,
+            back: backId,
+            logo: logo,
+          );
 
       if (response.statusCode != 200) {
         state = false;
@@ -106,48 +111,44 @@ class AuthenticationController extends StateNotifier<bool> {
       return false;
     }
   }
+
   Future<Map<String, dynamic>> sendOTP({required String mobile}) async {
     try {
       state = true;
       // Format the phone number to international format if needed
-      String formattedNumber = mobile.startsWith('+') ? mobile : '+84${mobile.substring(1)}';
-      
-      final result = await firebaseAuthService.verifyPhoneNumber(formattedNumber);
-      
+      String formattedNumber =
+          mobile.startsWith('+') ? mobile : '+84${mobile.substring(1)}';
+
+      final result =
+          await firebaseAuthService.verifyPhoneNumber(formattedNumber);
+
       return result;
     } catch (e) {
-      return {
-        'success': false,
-        'message': e.toString()
-      };
+      return {'success': false, 'message': e.toString()};
     } finally {
       state = false;
     }
   }
 
   Future<Map<String, dynamic>> verifyOTP({required String otp}) async {
-  try {
-    state = true;
-    final result = await firebaseAuthService.verifyOTP(otp);
-    
-    if (result['success']) {
-      // Set đúng provider để verify phone number
-      ref.read(isPhoneNumberVerified.notifier).state = true;
-      print('Phone number verified: ${ref.read(isPhoneNumberVerified)}');
+    try {
+      state = true;
+      final result = await firebaseAuthService.verifyOTP(otp);
+
+      if (result['success']) {
+        // Set đúng provider để verify phone number
+        ref.read(isPhoneNumberVerified.notifier).state = true;
+        print('Phone number verified: ${ref.read(isPhoneNumberVerified)}');
+      }
+
+      return result;
+    } catch (e) {
+      print('OTP verification error: $e');
+      return {'success': false, 'message': e.toString()};
+    } finally {
+      state = false;
     }
-    
-    return result;
-  } catch (e) {
-    print('OTP verification error: $e');
-    return {
-      'success': false,
-      'message': e.toString()
-    };
-  } finally {
-    state = false;
   }
-}
-  
 }
 
 final authController = StateNotifierProvider<AuthenticationController, bool>(

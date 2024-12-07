@@ -105,13 +105,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "light": MessageLookupByLibrary.simpleMessage("Sáng"),
         "login": MessageLookupByLibrary.simpleMessage("Đăng nhập"),
         "loginTitle": MessageLookupByLibrary.simpleMessage(
-            "Đăng nhập vào Cổng Nhân viên của Fluffy Paw"),
+            "Đăng nhập vào Cổng Đại Lý của Fluffy Paw"),
         "logout": MessageLookupByLibrary.simpleMessage("Đăng xuất"),
         "logoutDes": MessageLookupByLibrary.simpleMessage(
             "Bạn có chắc chắn muốn đăng xuất khỏi tài khoản?"),
         "minOrderAmount":
             MessageLookupByLibrary.simpleMessage("Số tiền đơn hàng tối thiểu"),
         "newOrder": MessageLookupByLibrary.simpleMessage("Đơn hàng mới"),
+        "noServicesAvailable":
+            MessageLookupByLibrary.simpleMessage("Chưa có dịch vụ nào"),
         "onGoing": MessageLookupByLibrary.simpleMessage("Đang giao"),
         "ongoingOrder":
             MessageLookupByLibrary.simpleMessage("Đơn hàng đang xử lý"),

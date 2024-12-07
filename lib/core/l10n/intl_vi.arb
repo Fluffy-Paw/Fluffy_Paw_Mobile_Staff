@@ -1,7 +1,7 @@
 {
   "@@locale": "vi",
   "validationMessage": "trường không được để trống",
-  "loginTitle": "Đăng nhập vào Cổng Nhân viên của Fluffy Paw",
+  "loginTitle": "Đăng nhập vào Cổng Đại Lý của Fluffy Paw",
   "emailOrPhone": "Email hoặc Số điện thoại",
   "password": "Mật khẩu",
   "login": "Đăng nhập",
@@ -128,5 +128,6 @@
   "businessLicense": "Giấy phép kinh doanh",
   "uploadLicense": "Tải Giấy Phép",
   "taxNumber": "Mã số thuế",
-  "brandEmail": "Email của Hãng"
+  "brandEmail": "Email của Hãng",
+  "noServicesAvailable": "Chưa có dịch vụ nào"
 }

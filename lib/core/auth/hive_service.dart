@@ -1,6 +1,7 @@
 import 'package:fluffypawsm/core/utils/constants.dart';
 import 'package:fluffypawsm/data/models/conversation/conversation_model.dart';
 import 'package:fluffypawsm/data/models/profile/profile.dart';
+import 'package:fluffypawsm/data/models/service/service_by_brand.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -25,6 +26,7 @@ class HiveService {
     }
     return null;
   }
+
   Future<void> saveRecentSearches(List<String> searches) async {
     final box = await Hive.openBox('appBox');
     await box.put(AppConstants.recentSearchesKey, searches);
@@ -57,7 +59,7 @@ class HiveService {
     Map<dynamic, dynamic>? userInfo = userBox.get(AppConstants.userData);
     if (userInfo != null) {
       Map<String, dynamic> userInfoStringKeys =
-      userInfo.cast<String, dynamic>();
+          userInfo.cast<String, dynamic>();
       User user = User.fromMap(userInfoStringKeys);
       return user;
     }
@@ -69,6 +71,7 @@ class HiveService {
     final userBox = await Hive.openBox(AppConstants.userBox);
     userBox.clear();
   }
+
   //
   Future<bool> removeAllData() async {
     try {
@@ -78,6 +81,7 @@ class HiveService {
       return false;
     }
   }
+
   Future<void> saveOrderStatuses({
     required int acceptedOrders,
     required int pendingOrders,
@@ -99,12 +103,18 @@ class HiveService {
   Future<Map<String, int>> getOrderStatuses() async {
     final orderStatusBox = await Hive.openBox(AppConstants.orderStatusBox);
     return {
-      AppConstants.acceptedOrders: orderStatusBox.get(AppConstants.acceptedOrders, defaultValue: 0),
-      AppConstants.pendingOrders: orderStatusBox.get(AppConstants.pendingOrders, defaultValue: 0),
-      AppConstants.canceledOrders: orderStatusBox.get(AppConstants.canceledOrders, defaultValue: 0),
-      AppConstants.deniedOrders: orderStatusBox.get(AppConstants.deniedOrders, defaultValue: 0),
-      AppConstants.overTimeOrders: orderStatusBox.get(AppConstants.overTimeOrders, defaultValue: 0),
-      AppConstants.endedOrders: orderStatusBox.get(AppConstants.endedOrders, defaultValue: 0),
+      AppConstants.acceptedOrders:
+          orderStatusBox.get(AppConstants.acceptedOrders, defaultValue: 0),
+      AppConstants.pendingOrders:
+          orderStatusBox.get(AppConstants.pendingOrders, defaultValue: 0),
+      AppConstants.canceledOrders:
+          orderStatusBox.get(AppConstants.canceledOrders, defaultValue: 0),
+      AppConstants.deniedOrders:
+          orderStatusBox.get(AppConstants.deniedOrders, defaultValue: 0),
+      AppConstants.overTimeOrders:
+          orderStatusBox.get(AppConstants.overTimeOrders, defaultValue: 0),
+      AppConstants.endedOrders:
+          orderStatusBox.get(AppConstants.endedOrders, defaultValue: 0),
     };
   }
 
@@ -113,32 +123,68 @@ class HiveService {
     final orderStatusBox = await Hive.openBox(AppConstants.orderStatusBox);
     orderStatusBox.put(status, newCount);
   }
+
   Future<void> saveConversations({
     required List<ConversationModel> conversations,
   }) async {
-    final conversationBox = await Hive.openBox<dynamic>(AppConstants.conversationBox);
-    
+    final conversationBox =
+        await Hive.openBox<dynamic>(AppConstants.conversationBox);
+
     // Store only essential metadata
-    final conversationData = conversations.map((conv) => {
-      'id': conv.id,
-      'poAccountId': conv.poAccountId,
-      'lastMessage': conv.lastMessage,
-      'timeSinceLastMessage': conv.timeSinceLastMessage,
-      'poName': conv.poName,
-      'poAvatar': conv.poAvatar,
-    }).toList();
-    
+    final conversationData = conversations
+        .map((conv) => {
+              'id': conv.id,
+              'poAccountId': conv.poAccountId,
+              'lastMessage': conv.lastMessage,
+              'timeSinceLastMessage': conv.timeSinceLastMessage,
+              'poName': conv.poName,
+              'poAvatar': conv.poAvatar,
+            })
+        .toList();
+
     await conversationBox.put('conversations', conversationData);
   }
 
   Future<List<ConversationModel>?> getConversations() async {
-    final conversationBox = await Hive.openBox<dynamic>(AppConstants.conversationBox);
+    final conversationBox =
+        await Hive.openBox<dynamic>(AppConstants.conversationBox);
     final data = conversationBox.get('conversations') as List?;
-    
+
     if (data == null) return null;
-    
-    return data.map((item) => ConversationModel.fromMap(Map<String, dynamic>.from(item))).toList();
+
+    return data
+        .map((item) =>
+            ConversationModel.fromMap(Map<String, dynamic>.from(item)))
+        .toList();
   }
 }
 
 final hiveStoreService = Provider((ref) => HiveService(ref));
+
+extension ServiceStorage on HiveService {
+  static const String _brandIdKey = 'brandId';
+
+  Future<void> saveBrandId(int brandId) async {
+    final box = await Hive.openBox(AppConstants.appSettingsBox);
+    await box.put(_brandIdKey, brandId);
+  }
+
+  Future<int?> getBrandId() async {
+    final box = await Hive.openBox(AppConstants.appSettingsBox);
+    return box.get(_brandIdKey);
+  }
+
+  Future<void> saveServices({required List<ServiceModel> services}) async {
+    final box = await Hive.openBox(AppConstants.servicesBox);
+    await box.put('services', services.map((s) => s.toMap()).toList());
+  }
+
+  Future<List<ServiceModel>?> getServices() async {
+    final box = await Hive.openBox(AppConstants.servicesBox);
+    final data = box.get('services') as List?;
+    if (data == null) return null;
+    return data
+        .map((item) => ServiceModel.fromMap(Map<String, dynamic>.from(item)))
+        .toList();
+  }
+}

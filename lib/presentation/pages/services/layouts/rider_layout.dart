@@ -26,22 +26,24 @@ class _RiderLayoutState extends ConsumerState<RiderLayout> {
   final TextEditingController riderSearchController = TextEditingController();
   final ScrollController scrollController = ScrollController();
   @override
-  void initState() {
-  WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-    riderSearchController.addListener(() {});
-
-    if (ref.read(serviceController.notifier).services == null) {
-      final userInfo = await ref.read(hiveStoreService).getUserInfo();
-      if (userInfo?.id != null) {
-        await ref.read(serviceController.notifier).getAllStoreServices(userInfo!.id);
-      }
-    }
-  });
-  
-  scrollController.addListener(() {
-    scrollListener();
-  });
+void initState() {
   super.initState();
+  
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    // Load data immediately when screen opens
+    final userInfo = await ref.read(hiveStoreService).getUserInfo();
+    if (userInfo?.id != null) {
+      await ref.read(serviceController.notifier).getAllStoreServices(userInfo!.id);
+    }
+
+    // Setup search listener
+    riderSearchController.addListener(() {
+      // Search implementation
+    });
+
+    // Setup scroll listener
+    scrollController.addListener(scrollListener);
+  });
 }
 
   int page = 1;
@@ -154,7 +156,7 @@ class _RiderLayoutState extends ConsumerState<RiderLayout> {
                     ),
                   ),
                   onPressed: () {
-                    //context.nav.pushNamed(Routes.createRider);
+                    context.nav.pushNamed(Routes.serviceListByBrand);
                   },
                   child: const Center(
                     child: Icon(

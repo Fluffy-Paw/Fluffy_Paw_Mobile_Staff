@@ -22,67 +22,74 @@ class SplashLayout extends ConsumerStatefulWidget {
 
 class _SplashLayoutState extends ConsumerState<SplashLayout> {
   Future<void> initializeApp() async {
-  try {
-    await Future.delayed(const Duration(seconds: 3));
-    
-    // Get token from storage
-    final token = await ref.read(hiveStoreService).getAuthToken();
-    
-    if (token == null) {
-      if (mounted) {
-        context.nav.pushNamedAndRemoveUntil(Routes.login, (route) => false);
-      }
-      return;
-    }
-    
-    // Validate token expiration
-    if (JwtDecoder.isExpired(token)) {
-      await ref.read(hiveStoreService).removeAllData();
-      if (mounted) {
-        context.nav.pushNamedAndRemoveUntil(Routes.login, (route) => false);
-      }
-      return;
-    }
-    
-    // Update API client token first
-    ref.read(apiClientProvider).updateToken(token: token);
-
     try {
-      // Get user profile first
-      await ref.read(profileController.notifier).getAccountDetails();
+      await Future.delayed(const Duration(seconds: 3));
       
-      // Initialize SignalR
-      //await ref.read(notificationControllerProvider.notifier).initializeSignalR();
+      // Get token from storage
+      final token = await ref.read(hiveStoreService).getAuthToken();
       
-      // Try to get dashboard info, but don't fail if empty
-      try {
-        await ref.read(dashboardController.notifier).getDashboardInfo();
-      } catch (e) {
-        debugPrint('Dashboard error: $e'); 
-        // Don't rethrow - continue even if dashboard fails
+      if (token == null) {
+        if (mounted) {
+          context.nav.pushNamedAndRemoveUntil(Routes.login, (route) => false);
+        }
+        return;
       }
-
-      if (mounted) {
-        context.nav.pushNamedAndRemoveUntil(Routes.core, (route) => false);
-      }
-    } catch (e) {
-      debugPrint('API Error: $e');
-      if (e.toString().contains('401') || e.toString().contains('Unauthorized')) {
+      
+      // Validate token expiration
+      if (JwtDecoder.isExpired(token)) {
         await ref.read(hiveStoreService).removeAllData();
         if (mounted) {
           context.nav.pushNamedAndRemoveUntil(Routes.login, (route) => false);
         }
         return;
       }
-      rethrow;
-    }
-  } catch (e) {
-    debugPrint('Initialization Error: $e');
-    if (mounted) {
-      context.nav.pushNamedAndRemoveUntil(Routes.login, (route) => false);
+      
+      // Update API client token first
+      ref.read(apiClientProvider).updateToken(token: token);
+
+      try {
+        // Decode token to get role
+        final decodedToken = JwtDecoder.decode(token);
+        final userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+        // Only load these APIs if role is NOT StoreManager
+        if (userRole != "StoreManager") {
+          // Get user profile
+          await ref.read(profileController.notifier).getAccountDetails();
+          
+          // Initialize SignalR (commented out)
+          //await ref.read(notificationControllerProvider.notifier).initializeSignalR();
+          
+          // Try to get dashboard info
+          try {
+            await ref.read(dashboardController.notifier).getDashboardInfo();
+          } catch (e) {
+            debugPrint('Dashboard error: $e');
+            // Don't rethrow - continue even if dashboard fails
+          }
+        }
+
+        if (mounted) {
+          context.nav.pushNamedAndRemoveUntil(Routes.core, (route) => false);
+        }
+      } catch (e) {
+        debugPrint('API Error: $e');
+        if (e.toString().contains('401') || e.toString().contains('Unauthorized')) {
+          await ref.read(hiveStoreService).removeAllData();
+          if (mounted) {
+            context.nav.pushNamedAndRemoveUntil(Routes.login, (route) => false);
+          }
+          return;
+        }
+        rethrow;
+      }
+    } catch (e) {
+      debugPrint('Initialization Error: $e');
+      if (mounted) {
+        context.nav.pushNamedAndRemoveUntil(Routes.login, (route) => false);
+      }
     }
   }
-}
 
   @override
   void initState() {

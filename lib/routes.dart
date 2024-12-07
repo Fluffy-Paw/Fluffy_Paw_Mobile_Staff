@@ -12,7 +12,9 @@ import 'package:fluffypawsm/presentation/pages/order/order_details_view.dart';
 import 'package:fluffypawsm/presentation/pages/profile/seller_account_view.dart';
 import 'package:fluffypawsm/presentation/pages/services/create_store_service_view.dart';
 import 'package:fluffypawsm/presentation/pages/services/service_detail_view.dart';
+import 'package:fluffypawsm/presentation/pages/services/service_list_view.dart';
 import 'package:fluffypawsm/presentation/pages/splash_screen/splash_view.dart';
+import 'package:fluffypawsm/presentation/pages/store_manager/store/store_list_view.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -30,6 +32,8 @@ class Routes{
   static const notification="/notification";
   static const signUp = '/signUp';
   static const underReviewAccount = '/underReviewAccount';
+  static const serviceListByBrand = '/serviceListByBrand';
+  static const storeList = '/storeList';
 }
 class StoreServiceRouteArgs {
   final int serviceId;
@@ -66,6 +70,12 @@ Route generatedRoutes(RouteSettings settings){
       break;
     case Routes.sellerAccount:
       child = const SellerAccountView();
+      break;
+    case Routes.serviceListByBrand:
+      child = const ServiceListView();
+      break;
+    case Routes.storeList:
+      child = const StoreListView();
       break;
 
     case Routes.createStoreService:

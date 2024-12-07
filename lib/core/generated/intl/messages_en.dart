@@ -103,13 +103,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "light": MessageLookupByLibrary.simpleMessage("Light"),
         "login": MessageLookupByLibrary.simpleMessage("Log in"),
         "loginTitle": MessageLookupByLibrary.simpleMessage(
-            "Login to Fluffy Paw Staff Portal"),
+            "Login to Fluffy Paw Merchant Portal"),
         "logout": MessageLookupByLibrary.simpleMessage("Logout"),
         "logoutDes": MessageLookupByLibrary.simpleMessage(
             "Are you sure, you want to log out of your account?"),
         "minOrderAmount":
             MessageLookupByLibrary.simpleMessage("Min Order Amount"),
         "newOrder": MessageLookupByLibrary.simpleMessage("New Order"),
+        "noServicesAvailable":
+            MessageLookupByLibrary.simpleMessage("No Services Available"),
         "onGoing": MessageLookupByLibrary.simpleMessage("On Going"),
         "ongoingOrder": MessageLookupByLibrary.simpleMessage("Ongoing Order"),
         "online": MessageLookupByLibrary.simpleMessage("Online"),

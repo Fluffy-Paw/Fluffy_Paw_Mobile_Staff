@@ -30,7 +30,18 @@ class AppConstants {
 
   static const String getPetById = '$baseUrl/api/Pet/GetPet';
   //Service by brand
-  
+  static const String getAllServiceByBrandId =
+      '$baseUrl/api/Staff/GetAllServiceByBrandId';
+
+  //SM
+  static const String getStatisticsUrl =
+      '$baseUrl/api/Dashboard/GetAllStaticsSM';
+  static const String getAlStoreSM='$baseUrl/api/StoreManager/GetAllStoreBySM';
+
+
+
+
+
   static const String invalidMST = 'Invalid tax number format';
   static const String requiredDocument = 'This document is required';
   static const String invalidImage = 'Invalid image format';
@@ -42,6 +53,7 @@ class AppConstants {
   static const String orderStatusBox = 'orderStatusBox';
   static const String notificationBox = 'notificationBox';
   static const String conversationBox = 'conversation_box';
+  static const String servicesBox = 'servicesBox';
 
   // Hive Keys
   static const String appLocal = 'appLocal';
