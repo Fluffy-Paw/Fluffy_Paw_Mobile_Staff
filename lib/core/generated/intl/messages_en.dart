@@ -35,7 +35,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("\'Assign for Delivery"),
         "assignToRider":
             MessageLookupByLibrary.simpleMessage("Assign to Rider"),
+        "backside": MessageLookupByLibrary.simpleMessage("Back Side"),
         "bannerImage": MessageLookupByLibrary.simpleMessage("Banner Image"),
+        "brandEmail": MessageLookupByLibrary.simpleMessage("Brand Email"),
+        "businessLicense":
+            MessageLookupByLibrary.simpleMessage("Business License"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "canceled": MessageLookupByLibrary.simpleMessage("Canceled"),
         "cancelled": MessageLookupByLibrary.simpleMessage("Cancelled"),
@@ -60,7 +64,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
         "dateOfBirth": MessageLookupByLibrary.simpleMessage("Date Of Birth"),
         "deliverd": MessageLookupByLibrary.simpleMessage("Deliverd"),
-        "deliveryDate": MessageLookupByLibrary.simpleMessage("Delivery Date"),
+        "deliveryDate": MessageLookupByLibrary.simpleMessage("End Date"),
         "denied": MessageLookupByLibrary.simpleMessage("Denied"),
         "description": MessageLookupByLibrary.simpleMessage("Description"),
         "dontHaveAnAccount":
@@ -81,9 +85,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "ended": MessageLookupByLibrary.simpleMessage("Ended"),
         "enterCode": MessageLookupByLibrary.simpleMessage("Enter Code"),
         "firstName": MessageLookupByLibrary.simpleMessage("First Name"),
+        "frontside": MessageLookupByLibrary.simpleMessage("Front Side"),
         "fullName": MessageLookupByLibrary.simpleMessage("Full Name"),
         "gender": MessageLookupByLibrary.simpleMessage("Gender"),
         "header": MessageLookupByLibrary.simpleMessage("Staff"),
+        "identitycard": MessageLookupByLibrary.simpleMessage("Identity Card"),
         "inActive": MessageLookupByLibrary.simpleMessage("Inactive"),
         "inbox": MessageLookupByLibrary.simpleMessage("Inbox"),
         "invoiceDownloaded": MessageLookupByLibrary.simpleMessage(
@@ -124,7 +130,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pending": MessageLookupByLibrary.simpleMessage("Pending"),
         "personalInfo": MessageLookupByLibrary.simpleMessage("Personal Info"),
         "phone": MessageLookupByLibrary.simpleMessage("Phone"),
-        "pickUpDate": MessageLookupByLibrary.simpleMessage("Pickup Date"),
+        "pickUpDate": MessageLookupByLibrary.simpleMessage("Create Date"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("Privacy Policy"),
         "proccedNext": MessageLookupByLibrary.simpleMessage("Procced Next"),
         "processing": MessageLookupByLibrary.simpleMessage("Processing"),
@@ -145,7 +151,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "service": MessageLookupByLibrary.simpleMessage("Service"),
         "serviceschedule":
             MessageLookupByLibrary.simpleMessage("Service Schedule"),
-        "shippingInfo": MessageLookupByLibrary.simpleMessage("Shipping Info"),
+        "shippingInfo": MessageLookupByLibrary.simpleMessage("Booking Info"),
         "shopDetails": MessageLookupByLibrary.simpleMessage("Shop Details"),
         "shopLogo": MessageLookupByLibrary.simpleMessage("Shop Logo"),
         "shopName": MessageLookupByLibrary.simpleMessage("Shop Name"),
@@ -154,6 +160,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Manage Service"),
         "storeAccount": MessageLookupByLibrary.simpleMessage("Store Account"),
         "submit": MessageLookupByLibrary.simpleMessage("Submit"),
+        "taxNumber": MessageLookupByLibrary.simpleMessage("Tax Number"),
         "termsconditions":
             MessageLookupByLibrary.simpleMessage("Terms & Conditions"),
         "theme": MessageLookupByLibrary.simpleMessage("Theme"),
@@ -170,6 +177,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "underReviewText": MessageLookupByLibrary.simpleMessage(
             "Your profile is under review"),
         "uploadBanner": MessageLookupByLibrary.simpleMessage("Upload Banner"),
+        "uploadLicense": MessageLookupByLibrary.simpleMessage("Upload License"),
         "uploadLogo": MessageLookupByLibrary.simpleMessage("Upload Logo"),
         "validationMessage":
             MessageLookupByLibrary.simpleMessage("field cannot be empty"),

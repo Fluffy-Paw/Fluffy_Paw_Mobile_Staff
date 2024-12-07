@@ -7,19 +7,33 @@ class AppConstants {
   static const String getAccountDetails = '$baseUrl/api/Staff/GetStoreByStaff';
   static const String acceptBooking = '$baseUrl/api/Staff/AcceptBooking';
   static const String deniedBooking = '$baseUrl/api/Staff/DeniedBooking';
-  static const String getStoreServiceForStaffbyStoreId = '$baseUrl/api/Service/GetAllServiceByStoreId';
-  static const String createStoreService = '$baseUrl/api/Staff/CreateStoreService';
-  static const String updateStoreService = '$baseUrl/api/Staff/UpdateStoreService';
-  static const String deleteStoreService = '$baseUrl/api/Staff/DeleteStoreService';
-  static const String getAllStoreServiceByServiceId = '$baseUrl/api/Staff/GetAllStoreServiceByServiceId';
+  static const String getStoreServiceForStaffbyStoreId =
+      '$baseUrl/api/Service/GetAllServiceByStoreId';
+  static const String createStoreService =
+      '$baseUrl/api/Staff/CreateStoreService';
+  static const String updateStoreService =
+      '$baseUrl/api/Staff/UpdateStoreService';
+  static const String deleteStoreService =
+      '$baseUrl/api/Staff/DeleteStoreService';
+  static const String getAllStoreServiceByServiceId =
+      '$baseUrl/api/Staff/GetAllStoreServiceByServiceId';
   //Chat
-  static const String getAllConversation='$baseUrl/api/Conversation/GetAllConversation';
-  static const String createConversation='$baseUrl/api/Conversation/CreateConversation';
-  static const String sendMessage='$baseUrl/api/Conversation/SendMessage';
-  static const String getAllConversationMessageByConversationId='$baseUrl/api/Conversation/GetAllConversationMessageByConversationId';
+  static const String getAllConversation =
+      '$baseUrl/api/Conversation/GetAllConversation';
+  static const String createConversation =
+      '$baseUrl/api/Conversation/CreateConversation';
+  static const String sendMessage = '$baseUrl/api/Conversation/SendMessage';
+  static const String getAllConversationMessageByConversationId =
+      '$baseUrl/api/Conversation/GetAllConversationMessageByConversationId';
+
+  //Pet
+
+  static const String getPetById = '$baseUrl/api/Pet/GetPet';
+  //Service by brand
   
-
-
+  static const String invalidMST = 'Invalid tax number format';
+  static const String requiredDocument = 'This document is required';
+  static const String invalidImage = 'Invalid image format';
 
   // Hive Box Names
   static const String appSettingsBox = 'appSettings';
@@ -27,7 +41,7 @@ class AppConstants {
   static const String userBox = 'fluffyPaw_userBox';
   static const String orderStatusBox = 'orderStatusBox';
   static const String notificationBox = 'notificationBox';
-    static const String conversationBox = 'conversation_box';
+  static const String conversationBox = 'conversation_box';
 
   // Hive Keys
   static const String appLocal = 'appLocal';
@@ -49,7 +63,4 @@ class AppConstants {
 
   // Currency
   static const String appCurrency = "\$";
-
-
-  
 }

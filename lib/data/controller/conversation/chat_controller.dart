@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:fluffypawsm/core/auth/hive_service.dart';
 import 'package:fluffypawsm/data/models/conversation/message_model.dart';
 import 'package:fluffypawsm/data/repositories/chat_service.dart';
-import 'package:fluffypawsm/core/auth/hive_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,50 +10,30 @@ class ChatController extends StateNotifier<AsyncValue<ChatPagination>> {
   final Ref ref;
   final int conversationId;
   late final ChatService _chatService;
-  int? _currentUserId;
-
+  
   ChatController(this.ref, this.conversationId) : super(const AsyncValue.loading()) {
     _chatService = ref.read(chatServiceProvider(_handleNewMessage));
     _initialize();
   }
 
   Future<void> _initialize() async {
-    final token = await ref.read(hiveStoreService).getAuthToken();
-    if (token != null) {
-      final parts = token.split('.');
-      if (parts.length > 1) {
-        final payload = parts[1];
-        final normalized = base64Url.normalize(payload);
-        final decoded = utf8.decode(base64Url.decode(normalized));
-        final json = jsonDecode(decoded);
-        _currentUserId = int.tryParse(json['id']?.toString() ?? '');
-      }
-    }
-    await _chatService.connectToSignalR();
-    getMessages(); // Initial load
+   // await _chatService.connectToSignalR();
+    getMessages();
   }
+  void updateMessage(Message newMessage) {
+    // Kiểm tra tin nhắn đã tồn tại chưa để tránh trùng lặp
+    if (state.hasValue) {
+      final currentState = state.value!;
+      final messageExists = currentState.items.any((msg) => 
+        msg.id == newMessage.id || 
+        (msg.senderId == newMessage.senderId && 
+         msg.content == newMessage.content &&
+         msg.createTime.difference(newMessage.createTime).inSeconds.abs() < 2)
+      );
 
-  void _handleNewMessage(String content, int messageConversationId, int targetId) {
-    if (messageConversationId == conversationId) {
-      if (state.hasValue) {
-        final currentState = state.value!;
-        
-        final newMessage = Message(
-          id: DateTime.now().millisecondsSinceEpoch,
-          conversationId: messageConversationId,
-          senderId: targetId, // Use target ID as sender
-          content: content,
-          createTime: DateTime.now(),
-          isSeen: false,
-          isDelete: false,
-          replyMessageId: 0,
-          deleteAt: null,
-          files: [],
-        );
-
-        final updatedMessages = [...currentState.items, newMessage];
+      if (!messageExists) {
         state = AsyncValue.data(ChatPagination(
-          items: updatedMessages,
+          items: [...currentState.items, newMessage],
           totalItems: currentState.totalItems + 1,
           currentPage: currentState.currentPage,
           totalPages: currentState.totalPages,
@@ -64,12 +44,60 @@ class ChatController extends StateNotifier<AsyncValue<ChatPagination>> {
       }
     }
   }
+  Future<int> _getCurrentUserId() async {
+    try {
+      final token = await ref.read(hiveStoreService).getAuthToken();
+      if (token == null) return 7; // Default to user ID if no token
+      
+      final parts = token.split('.');
+      final payload = base64Url.normalize(parts[1]);
+      final resp = utf8.decode(base64Url.decode(payload));
+      final map = json.decode(resp);
+      
+      return int.parse(map['id'].toString());
+    } catch (e) {
+      print('Error getting user ID: $e');
+      return 7; // Default to user ID on error
+    }
+  }
+
+  void _handleNewMessage(String content, int messageConversationId, int targetId, List<String> attachments) {
+  if (messageConversationId == conversationId && state.hasValue) {
+    final currentState = state.value!;
+    final newMessage = Message(
+      id: DateTime.now().millisecondsSinceEpoch,
+      conversationId: messageConversationId,
+      senderId: targetId,
+      content: content,
+      createTime: DateTime.now(),
+      isDelete: false,
+      replyMessageId: 0,
+      isSeen: false,
+      deleteAt: null,
+      files: attachments.map((url) => MessageFile(
+        id: DateTime.now().millisecondsSinceEpoch,
+        file: url,
+        createDate: DateTime.now(),
+        status: true,
+      )).toList(),
+    );
+
+    state = AsyncValue.data(ChatPagination(
+      items: [...currentState.items, newMessage],
+      totalItems: currentState.totalItems + 1,
+      currentPage: currentState.currentPage,
+      totalPages: currentState.totalPages,
+      pageSize: currentState.pageSize,
+      hasPreviousPage: currentState.hasPreviousPage,
+      hasNextPage: currentState.hasNextPage,
+    ));
+  }
+}
 
   Future<void> getMessages() async {
     try {
+      state = const AsyncValue.loading();
       final response = await _chatService.getMessages(conversationId);
-      
-      debugPrint('API Response: ${response.data}');
       
       if (response.data['statusCode'] == 200 && response.data['data'] != null) {
         final chatPagination = ChatPagination.fromMap(response.data['data']);
@@ -89,20 +117,35 @@ class ChatController extends StateNotifier<AsyncValue<ChatPagination>> {
     List<File>? files,
   }) async {
     try {
-      if (state.hasValue && _currentUserId != null) {
+      if (state.hasValue) {
         final currentState = state.value!;
-        
+        final userId = await _getCurrentUserId();
+
+        // Create optimistic files
+        List<MessageFile> optimisticFiles = [];
+        if (files != null) {
+          for (var file in files) {
+            optimisticFiles.add(MessageFile(
+              id: DateTime.now().millisecondsSinceEpoch + optimisticFiles.length,
+              file: file.path,
+              createDate: DateTime.now(),
+              status: false
+            ));
+          }
+        }
+
+        // Add optimistic message with files
         final optimisticMessage = Message(
           id: DateTime.now().millisecondsSinceEpoch,
           conversationId: conversationId,
-          senderId: _currentUserId!, // Use current user ID
+          senderId: userId,
           content: content,
           createTime: DateTime.now(),
           isSeen: false,
-          isDelete: false,  
+          isDelete: false,
           replyMessageId: replyMessageId ?? 0,
           deleteAt: null,
-          files: [],
+          files: optimisticFiles,
         );
 
         final updatedMessages = [...currentState.items, optimisticMessage];
@@ -117,6 +160,7 @@ class ChatController extends StateNotifier<AsyncValue<ChatPagination>> {
         ));
       }
 
+      // Send actual message
       final response = await _chatService.sendMessage(
         conversationId: conversationId,
         content: content,
@@ -124,48 +168,20 @@ class ChatController extends StateNotifier<AsyncValue<ChatPagination>> {
         files: files,
       );
 
-      if (response.data['statusCode'] != 200 || files?.isNotEmpty == true) {
-        await getMessages();
+      // Update with server response if needed
+      if (response.data['statusCode'] == 200 && files?.isNotEmpty == true) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final serverResponse = await _chatService.getMessages(conversationId);
+        if (serverResponse.data['statusCode'] == 200) {
+          final chatPagination = ChatPagination.fromMap(serverResponse.data['data']);
+          state = AsyncValue.data(chatPagination);
+        }
       }
 
       return response.data['statusCode'] == 200;
     } catch (e) {
       debugPrint('Error sending message: $e');
-      await getMessages();
       return false;
-    }
-  }
-
-  void markMessageAsSeen(Message message) {
-    if (state.hasValue && !message.isSeen) {
-      final currentState = state.value!;
-      final updatedMessages = currentState.items.map((m) {
-        if (m.id == message.id) {
-          return Message(
-            id: m.id,
-            conversationId: m.conversationId,
-            senderId: m.senderId,
-            content: m.content,
-            createTime: m.createTime,
-            isSeen: true,
-            isDelete: m.isDelete,
-            replyMessageId: m.replyMessageId,
-            deleteAt: m.deleteAt,
-            files: m.files,
-          );
-        }
-        return m;
-      }).toList();
-
-      state = AsyncValue.data(ChatPagination(
-        items: updatedMessages,
-        totalItems: currentState.totalItems,
-        currentPage: currentState.currentPage,
-        totalPages: currentState.totalPages,
-        pageSize: currentState.pageSize,
-        hasPreviousPage: currentState.hasPreviousPage,
-        hasNextPage: currentState.hasNextPage,
-      ));
     }
   }
 

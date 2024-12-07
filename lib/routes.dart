@@ -1,6 +1,8 @@
 import 'package:fluffypawsm/data/models/dashboard/dashboard_model.dart';
 import 'package:fluffypawsm/data/models/service/create_store.dart';
 import 'package:fluffypawsm/data/models/service/service.dart';
+import 'package:fluffypawsm/presentation/pages/authentication/signup_view.dart';
+import 'package:fluffypawsm/presentation/pages/authentication/under_review_view.dart';
 import 'package:fluffypawsm/presentation/pages/bottom_navigation_bar/bottom_navigation_bar_view.dart';
 import 'package:fluffypawsm/presentation/pages/bottom_navigation_bar/layouts/bottom_navigation_layout.dart';
 import 'package:fluffypawsm/presentation/pages/dashboard/dashboard_view.dart';
@@ -26,6 +28,8 @@ class Routes{
   static const serviceDetails = '/serviceDetails';
   static const createStoreService = '/createStoreService';
   static const notification="/notification";
+  static const signUp = '/signUp';
+  static const underReviewAccount = '/underReviewAccount';
 }
 class StoreServiceRouteArgs {
   final int serviceId;
@@ -50,6 +54,12 @@ Route generatedRoutes(RouteSettings settings){
       child = const NotificationView();
     case Routes.login:
       child = const LoginView();
+      break;
+    case Routes.signUp:
+      child = const SignUpView();
+      break;
+    case Routes.underReviewAccount:
+      child = const UnderReviewView();
       break;
     case Routes.core:
       child = const BottomNavigationBarView();

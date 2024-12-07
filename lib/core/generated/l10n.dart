@@ -640,10 +640,10 @@ class S {
     );
   }
 
-  /// `Shipping Info`
+  /// `Booking Info`
   String get shippingInfo {
     return Intl.message(
-      'Shipping Info',
+      'Booking Info',
       name: 'shippingInfo',
       desc: '',
       args: [],
@@ -660,20 +660,20 @@ class S {
     );
   }
 
-  /// `Pickup Date`
+  /// `Create Date`
   String get pickUpDate {
     return Intl.message(
-      'Pickup Date',
+      'Create Date',
       name: 'pickUpDate',
       desc: '',
       args: [],
     );
   }
 
-  /// `Delivery Date`
+  /// `End Date`
   String get deliveryDate {
     return Intl.message(
-      'Delivery Date',
+      'End Date',
       name: 'deliveryDate',
       desc: '',
       args: [],
@@ -1255,6 +1255,76 @@ class S {
     return Intl.message(
       'Inbox',
       name: 'inbox',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Back Side`
+  String get backside {
+    return Intl.message(
+      'Back Side',
+      name: 'backside',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Front Side`
+  String get frontside {
+    return Intl.message(
+      'Front Side',
+      name: 'frontside',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Identity Card`
+  String get identitycard {
+    return Intl.message(
+      'Identity Card',
+      name: 'identitycard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Business License`
+  String get businessLicense {
+    return Intl.message(
+      'Business License',
+      name: 'businessLicense',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upload License`
+  String get uploadLicense {
+    return Intl.message(
+      'Upload License',
+      name: 'uploadLicense',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tax Number`
+  String get taxNumber {
+    return Intl.message(
+      'Tax Number',
+      name: 'taxNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Brand Email`
+  String get brandEmail {
+    return Intl.message(
+      'Brand Email',
+      name: 'brandEmail',
       desc: '',
       args: [],
     );

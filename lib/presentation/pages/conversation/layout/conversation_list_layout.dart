@@ -177,9 +177,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     MaterialPageRoute(
       builder: (context) => ChatScreen(
         conversationId: conversation.id,
-        storeName: conversation.poName,
-        storeAvatar: conversation.poAvatar,
-        staffAccountId: conversation.staffAccountId,  // Pass staffAccountId
+        poAccountId: conversation.staffAccountId,
+        storeName: conversation.poName ?? 'store name',
       ),
     ),
   ).then((_) {
@@ -197,7 +196,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         color: AppColor.violetColor.withOpacity(0.1),
       ),
       clipBehavior: Clip.hardEdge,
-      child: conversation.poAvatar != null && conversation.poAvatar!.isNotEmpty
+      child: conversation.storeAvatar != null && conversation.storeAvatar!.isNotEmpty
           ? Image.network(
               conversation.poAvatar!,
               fit: BoxFit.cover,
@@ -206,9 +205,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                   child: Text(
                     conversation.poName[0].toUpperCase(),
                     style: AppTextStyle(context).title.copyWith(
-                          color: AppColor.violetColor,
-                          fontSize: 24.sp,
-                        ),
+                      color: AppColor.violetColor,
+                      fontSize: 24.sp,
+                    ),
                   ),
                 );
               },
@@ -220,8 +219,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         ? loadingProgress.cumulativeBytesLoaded /
                             loadingProgress.expectedTotalBytes!
                         : null,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(AppColor.violetColor),
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColor.violetColor),
                   ),
                 );
               },
@@ -230,11 +228,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               child: Text(
                 conversation.poName[0].toUpperCase(),
                 style: AppTextStyle(context).title.copyWith(
-                      color: AppColor.violetColor,
-                      fontSize: 24.sp,
-                    ),
+                  color: AppColor.violetColor,
+                  fontSize: 24.sp,
+                ),
               ),
             ),
     );
-  }
+}
 }

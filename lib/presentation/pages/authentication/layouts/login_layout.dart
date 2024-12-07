@@ -4,12 +4,14 @@ import 'package:fluffypawsm/core/utils/app_color.dart';
 import 'package:fluffypawsm/core/utils/app_text_style.dart';
 import 'package:fluffypawsm/core/utils/context_less_navigation.dart';
 import 'package:fluffypawsm/core/utils/global_function.dart';
+import 'package:fluffypawsm/core/utils/theme.dart';
 import 'package:fluffypawsm/data/controller/authentication_controller.dart';
 import 'package:fluffypawsm/data/controller/dashboard_controller.dart';
 import 'package:fluffypawsm/dependency_injection/dependency_injection.dart';
 import 'package:fluffypawsm/presentation/widgets/component/custom_button.dart';
 import 'package:fluffypawsm/presentation/widgets/component/custom_text_field.dart';
 import 'package:fluffypawsm/routes.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -45,23 +47,23 @@ class _LoginLayoutState extends ConsumerState<LoginLayout> {
             child: RichText(
               text: TextSpan(
                 children: [
-                  // TextSpan(
-                  //   text: S.of(context).dontHaveAnAccount,
-                  //   style: AppTextStyle(context).bodyText.copyWith(
-                  //     fontWeight: FontWeight.w400,
-                  //     fontSize: 14.sp,
-                  //   ),
-                  // ),
-                  // TextSpan(
-                  //   text: S.of(context).register,
-                  //   style: AppTextStyle(context).bodyText.copyWith(
-                  //     fontWeight: FontWeight.w400,
-                  //     color: colors(context).primaryColor,
-                  //     fontSize: 14.sp,
-                  //   ),
-                  //   recognizer: TapGestureRecognizer()
-                  //     ..onTap = () => context.nav.pushNamed(Routes.signUp),
-                  // ),
+                  TextSpan(
+                    text: S.of(context).dontHaveAnAccount,
+                    style: AppTextStyle(context).bodyText.copyWith(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                  TextSpan(
+                    text: S.of(context).register,
+                    style: AppTextStyle(context).bodyText.copyWith(
+                      fontWeight: FontWeight.w400,
+                      color: colors(context).primaryColor,
+                      fontSize: 14.sp,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => context.nav.pushNamed(Routes.signUp),
+                  ),
                 ],
               ),
             ),

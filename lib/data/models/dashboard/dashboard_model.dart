@@ -205,6 +205,7 @@ class DashboardInfo {
 
 class Order {
   final int id;
+  final int petId;
   final String fullName;
   final String phone;
   final String serviceName;
@@ -219,6 +220,7 @@ class Order {
 
   Order({
     required this.id,
+    required this.petId,
     required this.fullName,
     required this.phone,
     required this.serviceName,
@@ -235,6 +237,7 @@ class Order {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'petId': petId,
       'fullName': fullName,
       'phone': phone,
       'serviceName': serviceName,
@@ -252,6 +255,7 @@ class Order {
   factory Order.fromMap(Map<String, dynamic> map) {
     return Order(
       id: map['id'] as int,
+      petId: map['petId'] as int,
       fullName: map['fullName'] as String,
       phone: map['phone'] as String,
       serviceName: map['serviceName'] as String,

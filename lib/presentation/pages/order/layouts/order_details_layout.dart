@@ -8,10 +8,12 @@ import 'package:fluffypawsm/core/utils/app_text_style.dart';
 import 'package:fluffypawsm/core/utils/context_less_navigation.dart';
 import 'package:fluffypawsm/core/utils/global_function.dart';
 import 'package:fluffypawsm/data/controller/order_controller.dart';
+import 'package:fluffypawsm/data/controller/pet_controller.dart';
 import 'package:fluffypawsm/data/models/dashboard/dashboard_model.dart';
 import 'package:fluffypawsm/dependency_injection/dependency_injection.dart';
 import 'package:fluffypawsm/presentation/pages/check_in_check_out/checkin_confirmation_screen.dart';
 import 'package:fluffypawsm/presentation/pages/order/components/order_status_card.dart';
+import 'package:fluffypawsm/presentation/pages/pet/pet_detail_screen.dart';
 import 'package:fluffypawsm/presentation/pages/tracking/tracking_screen.dart';
 import 'package:fluffypawsm/presentation/widgets/component/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -69,13 +71,16 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
             children: AnimationConfiguration.toStaggeredList(
               duration: const Duration(milliseconds: 500),
               childAnimationBuilder: (widget) => SlideAnimation(
-                  verticalOffset: 50.0, child: FadeInAnimation(child: widget)),
+                verticalOffset: 50.0,
+                child: FadeInAnimation(child: widget),
+              ),
               children: [
                 Gap(2.h),
                 _buildHeaderWidget(context: context),
                 _buildShippingInfoCard(context: context),
                 _buildCustomerInfoCardWidget(context: context),
-                _buildCheckInOutStatus(context: context), // Thêm widget mới
+                _buildPetCard(context: context), // Add this line
+                _buildCheckInOutStatus(context: context),
                 _buildItemCardWidget(context: context),
               ],
             ),
@@ -449,6 +454,92 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
         ),
       );
     }
+  }
+
+  Widget _buildPetCard({required BuildContext context}) {
+    final petDetails =
+        ref.watch(petDetailControllerProvider(widget.order.petId));
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      margin: EdgeInsets.symmetric(horizontal: 20.w).copyWith(top: 10.h),
+      decoration: BoxDecoration(
+        color: AppColor.whiteColor,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Pet Information',
+            style: AppTextStyle(context).bodyTextSmall.copyWith(
+                color: AppColor.blackColor, fontWeight: FontWeight.w700),
+          ),
+          Gap(10.h),
+          petDetails.when(
+            data: (pet) => InkWell(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PetDetailScreen(petId: widget.order.petId),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 50.w,
+                    height: 50.w,
+                    decoration: BoxDecoration(
+                      color: AppColor.violetColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: pet.image != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8.r),
+                            child: Image.network(pet.image!, fit: BoxFit.cover),
+                          )
+                        : Icon(Icons.pets,
+                            color: AppColor.violetColor, size: 24.sp),
+                  ),
+                  Gap(12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          pet.name,
+                          style: AppTextStyle(context)
+                              .bodyText
+                              .copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        Gap(4.h),
+                        Text(
+                          '${pet.petType.name} • ${pet.age}',
+                          style: AppTextStyle(context).bodyTextSmall.copyWith(
+                                color: AppColor.blackColor.withOpacity(0.6),
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16.sp,
+                    color: AppColor.blackColor.withOpacity(0.3),
+                  ),
+                ],
+              ),
+            ),
+            loading: () => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            error: (error, _) => Center(
+              child: Text('Error: ${error.toString()}'),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleQRData(String qrData) async {

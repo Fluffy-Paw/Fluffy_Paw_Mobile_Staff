@@ -34,7 +34,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("\'Giao cho tài xế"),
         "assignToRider":
             MessageLookupByLibrary.simpleMessage("Giao cho tài xế"),
+        "backside": MessageLookupByLibrary.simpleMessage("Ảnh sau"),
         "bannerImage": MessageLookupByLibrary.simpleMessage("Hình ảnh Banner"),
+        "brandEmail": MessageLookupByLibrary.simpleMessage("Email của Hãng"),
+        "businessLicense":
+            MessageLookupByLibrary.simpleMessage("Giấy phép kinh doanh"),
         "cancel": MessageLookupByLibrary.simpleMessage("Hủy"),
         "canceled": MessageLookupByLibrary.simpleMessage("Đã hủy"),
         "cancelled": MessageLookupByLibrary.simpleMessage("Đã hủy"),
@@ -60,7 +64,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "dashboard": MessageLookupByLibrary.simpleMessage("Bảng điều khiển"),
         "dateOfBirth": MessageLookupByLibrary.simpleMessage("Ngày sinh"),
         "deliverd": MessageLookupByLibrary.simpleMessage("Đã giao"),
-        "deliveryDate": MessageLookupByLibrary.simpleMessage("Ngày giao hàng"),
+        "deliveryDate": MessageLookupByLibrary.simpleMessage("Ngày kết thúc"),
         "denied": MessageLookupByLibrary.simpleMessage("Đã từ chối"),
         "description": MessageLookupByLibrary.simpleMessage("Mô tả"),
         "dontHaveAnAccount":
@@ -82,9 +86,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "ended": MessageLookupByLibrary.simpleMessage("Đã kết thúc"),
         "enterCode": MessageLookupByLibrary.simpleMessage("Nhập mã"),
         "firstName": MessageLookupByLibrary.simpleMessage("Tên"),
+        "frontside": MessageLookupByLibrary.simpleMessage("Ảnh trước"),
         "fullName": MessageLookupByLibrary.simpleMessage("Họ và tên"),
         "gender": MessageLookupByLibrary.simpleMessage("Giới tính"),
         "header": MessageLookupByLibrary.simpleMessage("Nhân Viên"),
+        "identitycard":
+            MessageLookupByLibrary.simpleMessage("Căn cước công dân"),
         "inActive": MessageLookupByLibrary.simpleMessage("Không hoạt động"),
         "inbox": MessageLookupByLibrary.simpleMessage("Tin nhắn"),
         "invoiceDownloaded": MessageLookupByLibrary.simpleMessage(
@@ -129,7 +136,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "personalInfo":
             MessageLookupByLibrary.simpleMessage("Thông tin cá nhân"),
         "phone": MessageLookupByLibrary.simpleMessage("Số điện thoại"),
-        "pickUpDate": MessageLookupByLibrary.simpleMessage("Ngày đón hàng"),
+        "pickUpDate": MessageLookupByLibrary.simpleMessage("Ngày tạo"),
         "privacyPolicy":
             MessageLookupByLibrary.simpleMessage("Chính sách bảo mật"),
         "proccedNext": MessageLookupByLibrary.simpleMessage("Tiếp tục"),
@@ -154,7 +161,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "service": MessageLookupByLibrary.simpleMessage("Dịch Vụ"),
         "serviceschedule": MessageLookupByLibrary.simpleMessage("Lịch trình"),
         "shippingInfo":
-            MessageLookupByLibrary.simpleMessage("Thông tin vận chuyển"),
+            MessageLookupByLibrary.simpleMessage("Thông tin đặt lịch"),
         "shopDetails":
             MessageLookupByLibrary.simpleMessage("Thông tin cửa hàng"),
         "shopLogo": MessageLookupByLibrary.simpleMessage("Logo cửa hàng"),
@@ -165,6 +172,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "storeAccount":
             MessageLookupByLibrary.simpleMessage("Tài khoản cửa hàng"),
         "submit": MessageLookupByLibrary.simpleMessage("Gửi"),
+        "taxNumber": MessageLookupByLibrary.simpleMessage("Mã số thuế"),
         "termsconditions":
             MessageLookupByLibrary.simpleMessage("Điều khoản & Điều kiện"),
         "theme": MessageLookupByLibrary.simpleMessage("Chủ đề"),
@@ -181,6 +189,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "underReviewText": MessageLookupByLibrary.simpleMessage(
             "Hồ sơ của bạn đang được xem xét"),
         "uploadBanner": MessageLookupByLibrary.simpleMessage("Tải lên Banner"),
+        "uploadLicense": MessageLookupByLibrary.simpleMessage("Tải Giấy Phép"),
         "uploadLogo": MessageLookupByLibrary.simpleMessage("Tải lên Logo"),
         "validationMessage":
             MessageLookupByLibrary.simpleMessage("trường không được để trống"),

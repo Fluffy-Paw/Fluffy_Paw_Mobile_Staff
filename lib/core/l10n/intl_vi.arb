@@ -59,10 +59,10 @@
   "orderDetails": "Chi tiết đơn hàng",
   "orderNotFound": "Không tìm thấy đơn hàng!",
   "invoiceDownloaded": "Hóa đơn đã được tải xuống thành công",
-  "shippingInfo": "Thông tin vận chuyển",
+  "shippingInfo": "Thông tin đặt lịch",
   "address": "Địa chỉ",
-  "pickUpDate": "Ngày đón hàng",
-  "deliveryDate": "Ngày giao hàng",
+  "pickUpDate": "Ngày tạo",
+  "deliveryDate": "Ngày kết thúc",
   "customerInfo": "Thông tin khách hàng",
   "items": "Mặt hàng",
   "accepAndAssignRider": "Chấp nhận & giao cho tài xế",
@@ -121,5 +121,12 @@
   "createnewschedule": "Tạo thời gian mới",
   "serviceschedule": "Lịch trình",
   "service": "Dịch Vụ",
-  "inbox": "Tin nhắn"
+  "inbox": "Tin nhắn",
+  "backside": "Ảnh sau",
+  "frontside": "Ảnh trước",
+  "identitycard": "Căn cước công dân",
+  "businessLicense": "Giấy phép kinh doanh",
+  "uploadLicense": "Tải Giấy Phép",
+  "taxNumber": "Mã số thuế",
+  "brandEmail": "Email của Hãng"
 }

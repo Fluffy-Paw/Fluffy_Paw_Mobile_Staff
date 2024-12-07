@@ -59,10 +59,10 @@
   "orderDetails": "Order Details",
   "orderNotFound": "No order found!",
   "invoiceDownloaded": "Invoice Downloaded Successfully",
-  "shippingInfo": "Shipping Info",
+  "shippingInfo": "Booking Info",
   "address": "Address",
-  "pickUpDate": "Pickup Date",
-  "deliveryDate": "Delivery Date",
+  "pickUpDate": "Create Date",
+  "deliveryDate": "End Date",
   "customerInfo": "Customer Info",
   "items": "Items",
   "accepAndAssignRider": "Accept & assign for Pickup",
@@ -121,5 +121,12 @@
   "createnewschedule": "Create New Schedule",
   "serviceschedule": "Service Schedule",
   "service": "Service",
-  "inbox": "Inbox"
+  "inbox": "Inbox",
+  "backside": "Back Side",
+  "frontside": "Front Side",
+  "identitycard": "Identity Card",
+  "businessLicense": "Business License",
+  "uploadLicense": "Upload License",
+  "taxNumber": "Tax Number",
+  "brandEmail": "Brand Email"
 }

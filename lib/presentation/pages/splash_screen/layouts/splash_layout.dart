@@ -52,7 +52,7 @@ class _SplashLayoutState extends ConsumerState<SplashLayout> {
       await ref.read(profileController.notifier).getAccountDetails();
       
       // Initialize SignalR
-      await ref.read(notificationControllerProvider.notifier).initializeSignalR();
+      //await ref.read(notificationControllerProvider.notifier).initializeSignalR();
       
       // Try to get dashboard info, but don't fail if empty
       try {

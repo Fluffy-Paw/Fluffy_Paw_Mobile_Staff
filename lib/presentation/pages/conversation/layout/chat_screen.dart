@@ -1,14 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:fluffypawsm/core/auth/hive_service.dart';
 import 'package:fluffypawsm/core/utils/app_color.dart';
 import 'package:fluffypawsm/core/utils/app_text_style.dart';
 import 'package:fluffypawsm/data/controller/conversation/chat_controller.dart';
-import 'package:fluffypawsm/data/controller/conversation/conversation_controller.dart';
 import 'package:fluffypawsm/data/models/conversation/message_model.dart';
-import 'package:fluffypawsm/data/models/profile/profile.dart';
-import 'package:fluffypawsm/data/repositories/jwt_service.dart';
+import 'package:fluffypawsm/data/repositories/chat_service.dart';
 import 'package:fluffypawsm/presentation/pages/conversation/layout/chat_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,14 +16,14 @@ class ChatScreen extends ConsumerStatefulWidget {
   final int conversationId;
   final String storeName;
   final String? storeAvatar;
-  final int staffAccountId;
+  final int poAccountId;
 
   const ChatScreen({
     Key? key,
     required this.conversationId,
     required this.storeName,
-    required this.staffAccountId,
     this.storeAvatar,
+    required this.poAccountId,
   }) : super(key: key);
 
   @override
@@ -42,22 +38,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   bool _isAttachmentVisible = false;
   bool _isSending = false;
   int? _previousMessageCount;
-  int? _currentUserId;
 
- Future<void> _initializeUserId() async {
-    final token = await ref.read(hiveStoreService).getAuthToken();
-    if (token != null) {
-      final parts = token.split('.');
-      if (parts.length > 1) {
-        final payload = parts[1];
-        final normalized = base64Url.normalize(payload);
-        final decoded = utf8.decode(base64Url.decode(normalized));
-        final json = jsonDecode(decoded);
-        setState(() {
-          _currentUserId = int.tryParse(json['id']?.toString() ?? '');
-        });
-      }
-    }
+  @override
+  void initState() {
+    super.initState();
+    // Scroll to bottom initially
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
   }
 
   @override
@@ -70,7 +58,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
-        0, // Thay đổi vị trí cuộn về 0 vì danh sách đã đảo ngược
+        _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
@@ -99,29 +87,26 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (_messageController.text.trim().isEmpty && _selectedFiles.isEmpty)
       return;
 
+    final content = _messageController.text.trim();
+    final files = List<File>.from(_selectedFiles);
+
+    // Clear input immediately
+    _messageController.clear();
     setState(() {
+      _selectedFiles.clear();
+      _isAttachmentVisible = false;
       _isSending = true;
     });
 
     try {
-      final success = await ref
+      await ref
           .read(chatControllerProvider(widget.conversationId).notifier)
           .sendMessage(
-            content: _messageController.text,
-            files: _selectedFiles,
+            content: content,
+            files: files,
           );
-
-      if (success && mounted) {
-        _messageController.clear();
-        setState(() {
-          _selectedFiles.clear();
-          _isAttachmentVisible = false;
-        });
-
-        // Delay slightly to ensure the message is added before scrolling
-        await Future.delayed(const Duration(milliseconds: 100));
-        _scrollToBottom();
-      }
+    } catch (e) {
+      debugPrint('Error sending message: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -140,7 +125,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       final currentCount = chatState.value?.items.length ?? 0;
       if (_previousMessageCount != null &&
           currentCount > _previousMessageCount!) {
-        // New message received
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _scrollToBottom();
         });
@@ -249,30 +233,32 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildMessageList(List<Message> messages) {
-  return ListView.builder(
-    controller: _scrollController,
-    padding: EdgeInsets.all(16.w),
-    reverse: false,
-    itemCount: messages.length,
-    itemBuilder: (context, index) {
-      final message = messages[index];
-      final bool showDate = index == 0 ||
-          !_isSameDay(messages[index].createTime, messages[index - 1].createTime);
+    return ListView.builder(
+      controller: _scrollController,
+      padding: EdgeInsets.all(16.w),
+      reverse: false, // Messages are displayed from top to bottom
+      itemCount: messages.length,
+      itemBuilder: (context, index) {
+        final message = messages[index];
+        final bool showDate = index == 0 ||
+            !_isSameDay(
+                messages[index].createTime, messages[index - 1].createTime);
 
-      return Column(
-        children: [
-          if (showDate) _buildDateDivider(message.createTime),
-          MessageBubble(
-            message: message,
-            targetId: widget.staffAccountId,  // Pass staffAccountId here
-            isSending: _isSending && index == messages.length - 1,
-          ),
-        ],
-      );
-    },
-  );
-}
-
+        return Column(
+          children: [
+            if (showDate) _buildDateDivider(message.createTime),
+            MessageBubble(
+              message: message,
+              targetId: widget.poAccountId,
+              conversationId: widget.conversationId,
+              scrollController: _scrollController, // Pass the scroll controller
+              isSending: _isSending && index == messages.length - 1,
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Widget _buildDateDivider(DateTime date) {
     return Padding(
@@ -322,13 +308,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             label: 'Camera',
             onTap: _takePicture,
           ),
-          // _buildAttachmentOption(
-          //   icon: Icons.insert_drive_file,
-          //   label: 'Document',
-          //   onTap: () {
-          //     // Handle document selection
-          //   },
-          // ),
+          _buildAttachmentOption(
+            icon: Icons.insert_drive_file,
+            label: 'Document',
+            onTap: () {
+              // Handle document selection
+            },
+          ),
         ],
       ),
     );
@@ -571,18 +557,52 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         return '';
     }
   }
+  void _handleNewMessage(String content, int conversationId, int targetId,
+      List<String> attachments) async {
+    final newMessage = Message(
+      id: DateTime.now().millisecondsSinceEpoch,
+      conversationId: conversationId,
+      senderId: targetId,
+      content: content,
+      createTime: DateTime.now(),
+      //createDate: DateTime.now(),
+      isDelete: false,
+      // status: true,
+      replyMessageId: 0,
+      isSeen: false,
+      deleteAt: null,
+      files: attachments
+          .map((url) => MessageFile(
+                id: DateTime.now().millisecondsSinceEpoch,
+                file: url,
+                createDate: DateTime.now(),
+                status: true,
+              ))
+          .toList(),
+    );
+
+    ref
+        .read(chatControllerProvider(widget.conversationId).notifier)
+        .updateMessage(newMessage);
+    _scrollToBottom();
+  }
+
 }
 
 class MessageBubble extends ConsumerStatefulWidget {
   final Message message;
   final bool isSending;
   final int targetId;
+  final int conversationId;
+  final ScrollController scrollController;
 
   const MessageBubble({
     Key? key,
     required this.message,
     required this.targetId,
     this.isSending = false,
+    required this.scrollController,
+    required this.conversationId,
   }) : super(key: key);
 
   @override
@@ -593,16 +613,20 @@ class _MessageBubbleState extends ConsumerState<MessageBubble> {
   @override
   Widget build(BuildContext context) {
     bool isStaffMessage = widget.message.senderId == widget.targetId;
-    
+
     return Opacity(
       opacity: widget.isSending ? 0.7 : 1.0,
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 4.h),
         child: Column(
-          crossAxisAlignment: isStaffMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isStaffMessage
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: isStaffMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+              mainAxisAlignment: isStaffMessage
+                  ? MainAxisAlignment.end
+                  : MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (!isStaffMessage) ...[
@@ -632,19 +656,23 @@ class _MessageBubbleState extends ConsumerState<MessageBubble> {
                       maxWidth: MediaQuery.of(context).size.width * 0.75,
                     ),
                     decoration: BoxDecoration(
-                      color: isStaffMessage ? AppColor.violetColor : Colors.grey[100],
+                      color: isStaffMessage
+                          ? AppColor.violetColor
+                          : Colors.grey[100],
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(16.r),
                         topRight: Radius.circular(16.r),
-                        bottomLeft: Radius.circular(isStaffMessage ? 16.r : 4.r),
-                        bottomRight: Radius.circular(isStaffMessage ? 4.r : 16.r),
+                        bottomLeft:
+                            Radius.circular(isStaffMessage ? 16.r : 4.r),
+                        bottomRight:
+                            Radius.circular(isStaffMessage ? 4.r : 16.r),
                       ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (widget.message.files.isNotEmpty) ...[
-                          _buildMessageImages(context),
+                          _buildMessageImages(),
                           if (widget.message.content.isNotEmpty)
                             Container(
                               width: double.infinity,
@@ -652,7 +680,9 @@ class _MessageBubbleState extends ConsumerState<MessageBubble> {
                               child: Text(
                                 widget.message.content,
                                 style: TextStyle(
-                                  color: isStaffMessage ? Colors.white : Colors.black87,
+                                  color: isStaffMessage
+                                      ? Colors.white
+                                      : Colors.black87,
                                   fontSize: 14.sp,
                                 ),
                               ),
@@ -663,7 +693,9 @@ class _MessageBubbleState extends ConsumerState<MessageBubble> {
                             child: Text(
                               widget.message.content,
                               style: TextStyle(
-                                color: isStaffMessage ? Colors.white : Colors.black87,
+                                color: isStaffMessage
+                                    ? Colors.white
+                                    : Colors.black87,
                                 fontSize: 14.sp,
                               ),
                             ),
@@ -682,7 +714,9 @@ class _MessageBubbleState extends ConsumerState<MessageBubble> {
                   right: isStaffMessage ? 0 : 36.w,
                 ),
                 child: Row(
-                  mainAxisAlignment: isStaffMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+                  mainAxisAlignment: isStaffMessage
+                      ? MainAxisAlignment.end
+                      : MainAxisAlignment.start,
                   children: [
                     Text(
                       _formatTime(widget.message.createTime),
@@ -696,7 +730,9 @@ class _MessageBubbleState extends ConsumerState<MessageBubble> {
                       Icon(
                         widget.message.isSeen ? Icons.done_all : Icons.done,
                         size: 14.sp,
-                        color: widget.message.isSeen ? AppColor.violetColor : Colors.grey[600],
+                        color: widget.message.isSeen
+                            ? AppColor.violetColor
+                            : Colors.grey[600],
                       ),
                     ],
                   ],
@@ -708,83 +744,132 @@ class _MessageBubbleState extends ConsumerState<MessageBubble> {
     );
   }
 
-  Widget _buildMessageImages(BuildContext context) {
-    final files = widget.message.files;
-    if (files.isEmpty) return const SizedBox.shrink();
+  Widget _buildMessageImages() {
+    // Remove parameter here
+    if (widget.message.files.isEmpty) return const SizedBox.shrink();
 
-    if (files.length == 1) {
-      return GestureDetector(
-        onTap: () => _showFullScreenImage(context, files[0].file),
-        child: ClipRRect(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(16.r),
-          ),
-          child: Image.network(
-            files[0].file,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return ImageLoadingPlaceholder(
-                height: 200.h,
-              );
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                height: 200.h,
-                color: Colors.grey[200],
-                child: Center(
-                  child: Icon(
-                    Icons.error_outline,
-                    color: Colors.red[400],
-                    size: 24.sp,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      );
-    }
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12.r),
+      child: widget.message.files.length == 1
+          ? _buildSingleImage(widget.message.files.first)
+          : GridView.count(
+              shrinkWrap: true,
+              crossAxisCount: 2,
+              mainAxisSpacing: 2,
+              crossAxisSpacing: 2,
+              physics: const NeverScrollableScrollPhysics(),
+              children: widget.message.files
+                  .map((file) => _buildImageTile(file))
+                  .toList(),
+            ),
+    );
+  }
 
+  Widget _buildSingleImage(MessageFile file) => _buildImageTile(file);
+  Widget _buildImageLoading() {
     return Container(
-      constraints: BoxConstraints(
-        maxHeight: 200.h,
-      ),
-      child: GridView.count(
-        padding: EdgeInsets.all(2.w),
-        crossAxisCount: 2,
-        mainAxisSpacing: 2,
-        crossAxisSpacing: 2,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        children: files.map((file) => GestureDetector(
-          onTap: () => _showFullScreenImage(context, file.file),
-          child: Image.network(
-            file.file,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return const ImageLoadingPlaceholder();
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: Colors.grey[200],
-                child: Center(
-                  child: Icon(
-                    Icons.error_outline,
-                    color: Colors.red[400],
-                    size: 24.sp,
-                  ),
-                ),
-              );
-            },
-          ),
-        )).toList(),
+      color: Colors.grey[200],
+      child: Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(AppColor.violetColor),
+        ),
       ),
     );
   }
 
-  void _showFullScreenImage(BuildContext context, String imageUrl) {
+  Widget _buildImageError() {
+    return Container(
+      color: Colors.grey[200],
+      child: Center(
+        child: Icon(
+          Icons.error_outline,
+          color: Colors.red[400],
+        ),
+      ),
+    );
+  }
+
+// Widget _buildSingleImage(MessageFile file) {
+//   return GestureDetector(
+//     onTap: () => _showFullScreenImage(context, file.file),
+//     child: Image.network(
+//       file.file,
+//       fit: BoxFit.cover,
+//       loadingBuilder: (context, child, loadingProgress) {
+//         if (loadingProgress == null) return child;
+//         return const ImageLoadingPlaceholder();
+//       },
+//       errorBuilder: (context, error, stackTrace) => const ImageErrorPlaceholder(),
+//     ),
+//   );
+// }
+  Widget _buildImageTile(MessageFile file) {
+    bool isLocalFile = file.file.startsWith('/');
+    return GestureDetector(
+      onTap: () => _showFullScreenImage(file.file),
+      child: isLocalFile
+          ? Image.file(
+              File(file.file),
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _buildImageError(),
+            )
+          : Image.network(
+              file.file,
+              fit: BoxFit.cover,
+              loadingBuilder: (_, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return _buildImageLoading();
+              },
+              errorBuilder: (_, __, ___) => _buildImageError(),
+            ),
+    );
+  }
+
+  Widget _buildMessageBubble(Message message, bool isCurrentUser) {
+    return Container(
+      margin: EdgeInsets.only(
+        bottom: 8.h,
+        left: isCurrentUser ? 64.w : 8.w,
+        right: isCurrentUser ? 8.w : 64.w,
+      ),
+      child: Column(
+        crossAxisAlignment:
+            isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          if (message.files.isNotEmpty)
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.7,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: _buildMessageImages(),
+            ),
+          if (message.content.isNotEmpty)
+            Container(
+              margin: EdgeInsets.only(top: message.files.isNotEmpty ? 8.h : 0),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: isCurrentUser ? AppColor.violetColor : Colors.white,
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Text(
+                message.content,
+                style: TextStyle(
+                  color: isCurrentUser ? Colors.white : Colors.black87,
+                  fontSize: 14.sp,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showFullScreenImage(String imagePath) {
+    bool isLocalFile = imagePath.startsWith('/');
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -799,22 +884,21 @@ class _MessageBubbleState extends ConsumerState<MessageBubble> {
             child: InteractiveViewer(
               minScale: 0.5,
               maxScale: 4.0,
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.contain,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              child: isLocalFile
+                  ? Image.file(
+                      File(imagePath),
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => _buildImageError(),
+                    )
+                  : Image.network(
+                      imagePath,
+                      fit: BoxFit.contain,
+                      loadingBuilder: (_, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return _buildImageLoading();
+                      },
+                      errorBuilder: (_, __, ___) => _buildImageError(),
                     ),
-                  );
-                },
-              ),
             ),
           ),
         ),
@@ -824,5 +908,15 @@ class _MessageBubbleState extends ConsumerState<MessageBubble> {
 
   String _formatTime(DateTime time) {
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+  }
+
+  void _scrollToBottom() {
+    if (widget.scrollController.hasClients) {
+      widget.scrollController.animateTo(
+        widget.scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 }

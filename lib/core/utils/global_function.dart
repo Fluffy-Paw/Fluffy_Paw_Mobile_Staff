@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluffypawsm/core/utils/app_color.dart';
 import 'package:fluffypawsm/dependency_injection/dependency_injection.dart';
 import 'package:flutter/material.dart';
@@ -7,10 +9,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 import '../generated/l10n.dart';
 import 'constants.dart';
-
 
 class GlobalFunction {
   GlobalFunction._();
@@ -46,22 +49,45 @@ class GlobalFunction {
 
   static Future<void> pickImageFromGallery(
       {required WidgetRef ref, required ImageType imageType}) async {
-    final picker = ImagePicker();
-    await picker.pickImage(source: ImageSource.gallery).then((imageFile) {
-      if (imageFile != null) {
-        switch (imageType) {
-          case ImageType.userProfile:
-            ref.read(selectedUserProfileImage.notifier).state = imageFile;
-            break;
-          case ImageType.shopLogo:
-            ref.read(selectedShopLogo.notifier).state = imageFile;
-            break;
-          case ImageType.shopBanner:
-            ref.read(selectedShopBanner.notifier).state = imageFile;
-            break;
-        }
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedImage = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
+
+    if (pickedImage != null) {
+      switch (imageType) {
+        case ImageType.userProfile:
+          ref.read(selectedUserProfileImage.notifier).state = pickedImage;
+          break;
+        case ImageType.frontId:
+          ref.read(frontIdProvider.notifier).state = pickedImage;
+          break;
+        case ImageType.backId:
+          ref.read(backIdProvider.notifier).state = pickedImage;
+          break;
+        case ImageType.businessLicense:
+          ref.read(businessLicenseProvider.notifier).state = pickedImage;
+          break;
+        case ImageType.shopLogo:
+          ref.read(selectedShopLogo.notifier).state = pickedImage;
+          break;
+        case ImageType.shopBanner:
+          ref.read(selectedShopBanner.notifier).state = pickedImage;
+          break;
       }
-    });
+    }
+  }
+
+  static Future<bool> checkGalleryPermission() async {
+    if (Platform.isIOS) {
+      final status = await Permission.photos.status;
+      if (status.isDenied) {
+        final result = await Permission.photos.request();
+        return result.isGranted;
+      }
+      return status.isGranted;
+    }
+    return true;
   }
 
   static String getDashboardSummeryLocalizationText(
@@ -79,27 +105,26 @@ class GlobalFunction {
   }
 
   static String getOrderStatusLocalizationText({
-  required String status,
-  required BuildContext context,
-}) {
-  switch (status) {
-    case "Accepted":
-      return S.of(context).accepted;
-    case "Pending":
-      return S.of(context).pending;
-    case "Canceled":
-      return S.of(context).canceled;
-    case "Denied":
-      return S.of(context).denied;
-    case "OverTime":
-      return S.of(context).overTime;
-    case "Ended":
-      return S.of(context).ended;
-    default:
-      return S.of(context).cancelled;
+    required String status,
+    required BuildContext context,
+  }) {
+    switch (status) {
+      case "Accepted":
+        return S.of(context).accepted;
+      case "Pending":
+        return S.of(context).pending;
+      case "Canceled":
+        return S.of(context).canceled;
+      case "Denied":
+        return S.of(context).denied;
+      case "OverTime":
+        return S.of(context).overTime;
+      case "Ended":
+        return S.of(context).ended;
+      default:
+        return S.of(context).cancelled;
+    }
   }
-}
-
 
   static String getRidersStatusLocalizationText(
       {required String status, required BuildContext context}) {
@@ -122,38 +147,21 @@ class GlobalFunction {
   }
 
   static final GlobalKey<NavigatorState> navigatorKey =
-  GlobalKey<NavigatorState>();
+      GlobalKey<NavigatorState>();
 
+  // Cập nhật showCustomSnackbar trong GlobalFunction
   static void showCustomSnackbar({
     required String message,
     required bool isSuccess,
     bool isTop = false,
   }) {
     final snackBar = SnackBar(
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(
-          16.r,
-        ),
-      ),
-      dismissDirection:
-      isTop ? DismissDirection.startToEnd : DismissDirection.down,
+      behavior: SnackBarBehavior.fixed, // Thay đổi floating thành fixed
       backgroundColor: isSuccess ? AppColor.violetColor : AppColor.redColor,
       content: Text(message),
-      margin: isTop
-          ? EdgeInsets.only(
-        bottom: MediaQuery.of(navigatorKey.currentState!.context)
-            .size
-            .height -
-            160,
-        right: 20,
-        left: 20,
-      )
-          : null,
     );
-    ScaffoldMessenger.of(navigatorKey.currentState!.context).showSnackBar(
-      snackBar,
-    );
+    ScaffoldMessenger.of(navigatorKey.currentState!.context)
+        .showSnackBar(snackBar);
   }
 
   static void changeStatusBarTheme({required isDark}) {
@@ -172,8 +180,8 @@ class GlobalFunction {
 
   static String? firstNameValidator(
       {required String value,
-        required String hintText,
-        required BuildContext context}) {
+      required String hintText,
+      required BuildContext context}) {
     if (containsNumber(value)) {
       return 'Please enter valid $hintText';
     } else if (value.isEmpty) {
@@ -182,10 +190,33 @@ class GlobalFunction {
     return null;
   }
 
+  static String? mstValidator({
+    required String value,
+    required String hintText,
+    required BuildContext context,
+  }) {
+    if (value.isEmpty) {
+      return errorText(fieldName: hintText, context: context);
+    }
+    // Có thể thêm validate cho định dạng MST nếu cần
+    return null;
+  }
+
+  static String? businessDocumentValidator({
+    required dynamic value,
+    required String hintText,
+    required BuildContext context,
+  }) {
+    if (value == null) {
+      return 'Please upload $hintText';
+    }
+    return null;
+  }
+
   static String? lastNameNameValidator(
       {required String value,
-        required String hintText,
-        required BuildContext context}) {
+      required String hintText,
+      required BuildContext context}) {
     if (containsNumber(value)) {
       return 'Please enter valid $hintText';
     } else if (value.isEmpty) {
@@ -201,8 +232,9 @@ class GlobalFunction {
   }) {
     if (value.isEmpty) {
       return errorText(fieldName: hintText, context: context);
-    } else if (value.length != 11) {
-      return 'Please enter a valid $hintText with exactly 11 digits';
+    } else if (value.length != 10) {
+      // Changed to check for 10 digits
+      return 'Please enter a valid $hintText with exactly 10 digits';
     }
     return null;
   }
@@ -302,61 +334,87 @@ class GlobalFunction {
   }
 
   static Color getStatusCardColor({required String status}) {
-  switch (status) {
-    case 'Accepted':
-      return AppColor.delivered; // Màu của trạng thái "Accepted"
-    case 'Pending':
-      return AppColor.pending; // Màu của trạng thái "Pending"
-    case 'Canceled':
-      return AppColor.redColor; // Màu của trạng thái "Canceled"
-    case 'Denied':
-      return AppColor.redColor; // Màu của trạng thái "Denied"
-    case 'OverTime':
-      return Colors.orange; // Màu của trạng thái "OverTime"
-    case 'Ended':
-      return Colors.green; // Màu của trạng thái "Ended"
-    default:
-      return AppColor.redColor; // Trạng thái mặc định nếu không khớp
+    switch (status) {
+      case 'Accepted':
+        return AppColor.delivered; // Màu của trạng thái "Accepted"
+      case 'Pending':
+        return AppColor.pending; // Màu của trạng thái "Pending"
+      case 'Canceled':
+        return AppColor.redColor; // Màu của trạng thái "Canceled"
+      case 'Denied':
+        return AppColor.redColor; // Màu của trạng thái "Denied"
+      case 'OverTime':
+        return Colors.orange; // Màu của trạng thái "OverTime"
+      case 'Ended':
+        return Colors.green; // Màu của trạng thái "Ended"
+      default:
+        return AppColor.redColor; // Trạng thái mặc định nếu không khớp
+    }
   }
-}
 
+  static void clearControllers({required WidgetRef ref}) {
+    // Account Information Controllers
+    ref.refresh(usernameProvider);
+    ref.refresh(fullNameProvider);
+    ref.refresh(hotlineProvider);
+    ref.refresh(emailProvider);
+    ref.refresh(passwordProvider);
+    ref.refresh(confirmPasswordProvider);
 
-  // static void clearControllers({required WidgetRef ref}) {
-  //   ref.refresh(firstNameProvider);
-  //   ref.refresh(lastNameProvider);
-  //   ref.refresh(phoneProvider);
-  //   ref.refresh(emailProvider);
-  //   ref.refresh(genderProvider);
-  //   ref.refresh(dateOfBirthProvider);
-  //   ref.refresh(passwordProvider);
-  //   ref.refresh(confirmPassProvider);
-  //   ref.refresh(shopNameProvider);
-  //   ref.refresh(orderPrefixCodeProvider);
-  //   ref.refresh(shopDescriptionProvider);
-  //   ref.refresh(dateOfBirthProvider);
-  //   ref.refresh(vehcleTypeProvider);
-  //   ref.refresh(drivingLicenceProvider);
-  //   ref.refresh(dateOfBirthProvider);
-  //   ref.refresh(selectedUserProfileImage);
-  //   ref.refresh(selectedShopLogo);
-  //   ref.refresh(selectedShopBanner);
-  // }
+    // Business Information Controllers
+    ref.refresh(nameProvider); // store name
+    ref.refresh(mstProvider); // tax code
+    ref.refresh(addressProvider);
+    ref.refresh(brandEmailProvider);
+
+    // Document Upload Providers
+    ref.refresh(businessLicenseProvider);
+    ref.refresh(frontIdProvider);
+    ref.refresh(backIdProvider);
+    ref.refresh(logoProvider);
+
+    // State Providers
+    ref.refresh(isCheckBox);
+    ref.refresh(isPhoneNumberVerified);
+    ref.refresh(obscureText1);
+    ref.refresh(obscureText2);
+  }
 
   static String numberLocalization(dynamic number) {
     dynamic local =
-    Hive.box(AppConstants.appSettingsBox).get(AppConstants.appLocal);
+        Hive.box(AppConstants.appSettingsBox).get(AppConstants.appLocal);
     double parsedNumber =
         double.tryParse(number.toString().replaceAll(',', '')) ?? 0.0;
     final NumberFormat numberFormat =
-    NumberFormat.decimalPattern(local['value']);
+        NumberFormat.decimalPattern(local['value']);
     return numberFormat.format(parsedNumber);
+  }
+
+  static bool isValidImageFormat(File file) {
+    final validExtensions = ['.jpg', '.jpeg', '.png'];
+    final extension = file.path.toLowerCase().split('.').last;
+    return validExtensions.contains('.$extension');
+  }
+
+  static String? validateImageFile({
+    required File? file,
+    required String fieldName,
+    required BuildContext context,
+  }) {
+    if (file == null) {
+      return errorText(fieldName: fieldName, context: context);
+    }
+    if (!isValidImageFormat(file)) {
+      return '$fieldName must be in JPG, JPEG or PNG format';
+    }
+    return null;
   }
 
   static String stringLocalization(String inputString, BuildContext context) {
     dynamic local =
-    Hive.box(AppConstants.appSettingsBox).get(AppConstants.appLocal);
+        Hive.box(AppConstants.appSettingsBox).get(AppConstants.appLocal);
     final formattedString =
-    NumberFormat.simpleCurrency(locale: local).format(0);
+        NumberFormat.simpleCurrency(locale: local).format(0);
 
     return '$inputString $formattedString';
   }
@@ -366,4 +424,7 @@ enum ImageType {
   userProfile,
   shopLogo,
   shopBanner,
+  businessLicense,
+  frontId,
+  backId,
 }

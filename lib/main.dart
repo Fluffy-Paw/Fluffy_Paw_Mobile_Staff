@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:fluffypawsm/core/auth/hive_service.dart';
 import 'package:fluffypawsm/core/utils/constants.dart';
 import 'package:fluffypawsm/core/utils/global_function.dart';
@@ -21,10 +24,14 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox(AppConstants.appSettingsBox);
   await Hive.openBox(AppConstants.userBox);
+  await Firebase.initializeApp();
+  
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationService.initialize();
+  
+  //await NotificationService.initialize();
   //await initializeBackgroundService();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  
   // await Firebase.initializeApp(
   //   options: DefaultFirebaseOptions.currentPlatform, // Initialize with options
   // );
@@ -108,53 +115,48 @@ class MyApp extends ConsumerWidget {
     );
   }
 }
-
 final appLifecycleProvider = Provider<AppLifecycleNotifier>((ref) {
   return AppLifecycleNotifier(ref);
 });
+
 
 class AppLifecycleNotifier extends WidgetsBindingObserver {
   final Ref ref;
   bool _initialized = false;
 
   AppLifecycleNotifier(this.ref) {
-    print('AppLifecycleNotifier: Initializing...');
+    print('AppLifecycleNotifier: Initializing...'); // Debug log
     WidgetsBinding.instance.addObserver(this);
-    _initSignalR();
+    // Khởi tạo SignalR ngay khi tạo AppLifecycleNotifier
+    _initSignalR(); 
   }
 
   Future<void> _initSignalR() async {
     if (_initialized) {
-      print('AppLifecycleNotifier: Already initialized');
+      print('AppLifecycleNotifier: Already initialized'); // Debug log
       return;
     }
 
-    print('AppLifecycleNotifier: Getting token...');
+    print('AppLifecycleNotifier: Getting token...'); // Debug log
     final token = await ref.read(hiveStoreService).getAuthToken();
     if (token != null) {
-      print('AppLifecycleNotifier: Token found, initializing SignalR...');
+      print('AppLifecycleNotifier: Token found, initializing SignalR...'); // Debug log
       await ref.read(notificationControllerProvider.notifier).initializeSignalR();
       _initialized = true;
     } else {
-      print('AppLifecycleNotifier: No token found');
+      print('AppLifecycleNotifier: No token found'); // Debug log
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('AppLifecycleNotifier: State changed to $state');
+    print('AppLifecycleNotifier: State changed to $state'); // Debug log
     switch (state) {
       case AppLifecycleState.resumed:
-        // Khi app được resume, kiểm tra và khôi phục kết nối nếu cần
-        Future.delayed(const Duration(seconds: 1), () {
-          ref.read(notificationControllerProvider.notifier).initializeSignalR();
-        });
+        _initSignalR();
         break;
       case AppLifecycleState.paused:
-        // Khi app tạm dừng, vẫn giữ kết nối
-        break;
       case AppLifecycleState.detached:
-        // Chỉ đóng kết nối khi app bị tắt hoàn toàn
         _initialized = false;
         ref.read(notificationControllerProvider.notifier).dispose();
         break;
@@ -163,9 +165,8 @@ class AppLifecycleNotifier extends WidgetsBindingObserver {
     }
   }
 
-  @override
   void dispose() {
-    print('AppLifecycleNotifier: Disposing...');
+    print('AppLifecycleNotifier: Disposing...'); // Debug log
     WidgetsBinding.instance.removeObserver(this);
   }
 }

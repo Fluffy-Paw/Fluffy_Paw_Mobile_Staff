@@ -26,12 +26,28 @@ class $AssetsImageGen {
   /// File path: assets/image/alert.png
   AssetGenImage get alert => const AssetGenImage('assets/image/alert.png');
 
+  /// File path: assets/image/avatar.png
+  AssetGenImage get avatar => const AssetGenImage('assets/image/avatar.png');
+
+  /// File path: assets/image/default_image.png
+  AssetGenImage get defaultImage =>
+      const AssetGenImage('assets/image/default_image.png');
+
   /// File path: assets/image/question.png
   AssetGenImage get question =>
       const AssetGenImage('assets/image/question.png');
 
+  /// File path: assets/image/shop_logo.png
+  AssetGenImage get shopLogo =>
+      const AssetGenImage('assets/image/shop_logo.png');
+
+  /// File path: assets/image/under_review.png
+  AssetGenImage get underReview =>
+      const AssetGenImage('assets/image/under_review.png');
+
   /// List of all assets
-  List<AssetGenImage> get values => [alert, question];
+  List<AssetGenImage> get values =>
+      [alert, avatar, defaultImage, question, shopLogo, underReview];
 }
 
 class $AssetsSvgGen {
