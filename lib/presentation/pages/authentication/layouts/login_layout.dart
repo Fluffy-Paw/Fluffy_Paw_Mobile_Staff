@@ -1,3 +1,4 @@
+import 'package:fluffypawsm/core/auth/hive_service.dart';
 import 'package:fluffypawsm/core/gen/assets.gen.dart';
 import 'package:fluffypawsm/core/generated/l10n.dart';
 import 'package:fluffypawsm/core/utils/app_color.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginLayout extends ConsumerStatefulWidget {
   const LoginLayout({super.key});
@@ -26,6 +28,7 @@ class LoginLayout extends ConsumerStatefulWidget {
   @override
   ConsumerState<LoginLayout> createState() => _LoginLayoutState();
 }
+
 class _LoginLayoutState extends ConsumerState<LoginLayout> {
   final List<FocusNode> fNodes = [FocusNode(), FocusNode()];
 
@@ -50,17 +53,17 @@ class _LoginLayoutState extends ConsumerState<LoginLayout> {
                   TextSpan(
                     text: S.of(context).dontHaveAnAccount,
                     style: AppTextStyle(context).bodyText.copyWith(
-                      fontWeight: FontWeight.w400,
-                      fontSize: 14.sp,
-                    ),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14.sp,
+                        ),
                   ),
                   TextSpan(
                     text: S.of(context).register,
                     style: AppTextStyle(context).bodyText.copyWith(
-                      fontWeight: FontWeight.w400,
-                      color: colors(context).primaryColor,
-                      fontSize: 14.sp,
-                    ),
+                          fontWeight: FontWeight.w400,
+                          color: colors(context).primaryColor,
+                          fontSize: 14.sp,
+                        ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () => context.nav.pushNamed(Routes.signUp),
                   ),
@@ -117,7 +120,7 @@ class _LoginLayoutState extends ConsumerState<LoginLayout> {
                     splashColor: Colors.transparent,
                     onPressed: () {
                       ref.read(obscureText1.notifier).state =
-                      !ref.read(obscureText1.notifier).state;
+                          !ref.read(obscureText1.notifier).state;
                     },
                     icon: Icon(
                       !ref.read(obscureText1.notifier).state
@@ -134,32 +137,29 @@ class _LoginLayoutState extends ConsumerState<LoginLayout> {
                 Gap(50.h),
                 ref.watch(authController)
                     ? const Align(
-                    alignment: Alignment.center,
-                    child: CircularProgressIndicator())
-                    :
-                CustomButton(
-                  buttonText: S.of(context).login,
-                  onPressed: () {
-                    FocusScope.of(context).unfocus();
-                    if (formKey.currentState!.validate()) {
-                      ref
-                          .read(authController.notifier)
-                          .login(
-                        contact: contactController.text,
-                        password: passwordController.text,
+                        alignment: Alignment.center,
+                        child: CircularProgressIndicator())
+                    : CustomButton(
+                        buttonText: S.of(context).login,
+                        onPressed: () {
+                          FocusScope.of(context).unfocus();
+                          if (formKey.currentState!.validate()) {
+                            ref
+                                .read(authController.notifier)
+                                .login(
+                                  contact: contactController.text,
+                                  password: passwordController.text,
+                                )
+                                .then((isSuccess) async {
+                              if (isSuccess) {
+                                
+                                context.nav.pushNamedAndRemoveUntil(
+                                    Routes.core, (route) => false);
+                              }
+                            });
+                          }
+                        },
                       )
-                          .then((isSuccess) {
-                        if (isSuccess) {
-                          ref
-                              .read(dashboardController.notifier)
-                              .getDashboardInfo();
-                          context.nav.pushNamedAndRemoveUntil(
-                              Routes.core, (route) => false);
-                        }
-                      });
-                    }
-                  },
-                )
               ],
             ),
           ),
@@ -167,5 +167,4 @@ class _LoginLayoutState extends ConsumerState<LoginLayout> {
       ),
     );
   }
-
 }

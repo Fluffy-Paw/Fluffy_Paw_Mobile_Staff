@@ -9,10 +9,10 @@ class ServiceModel {
   final double cost;
   final String description;
   final int bookingCount;
-  final int totalRating;
+  final double totalRating;
   final bool status;
   final String serviceTypeName;
-  final List<Certificate> certificate;
+  final List<Certificate> certificates;
 
   ServiceModel({
     required this.id,
@@ -28,7 +28,7 @@ class ServiceModel {
     required this.totalRating,
     required this.status,
     required this.serviceTypeName,
-    required this.certificate,
+    required this.certificates,
   });
 
   factory ServiceModel.fromMap(Map<String, dynamic> map) {
@@ -43,36 +43,17 @@ class ServiceModel {
       cost: (map['cost'] ?? 0).toDouble(),
       description: map['description'] ?? '',
       bookingCount: map['bookingCount'] ?? 0,
-      totalRating: map['totalRating'] ?? 0,
+      totalRating: (map['totalRating'] ?? 0).toDouble(),
       status: map['status'] ?? false,
       serviceTypeName: map['serviceTypeName'] ?? '',
-      certificate: (map['certificate'] as List<dynamic>?)
-          ?.map((cert) => Certificate.fromMap(cert as Map<String, dynamic>))
+      certificates: (map['certificate'] as List?)
+          ?.map((cert) => Certificate.fromMap(cert))
           .toList() ?? [],
     );
   }
 
   static List<ServiceModel> fromMapList(List<dynamic> list) {
     return list.map((item) => ServiceModel.fromMap(item)).toList();
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'serviceTypeId': serviceTypeId,
-      'brandId': brandId,
-      'brandName': brandName,
-      'name': name,
-      'image': image,
-      'duration': duration,
-      'cost': cost,
-      'description': description,
-      'bookingCount': bookingCount,
-      'totalRating': totalRating,
-      'status': status,
-      'serviceTypeName': serviceTypeName,
-      'certificate': certificate.map((cert) => cert.toMap()).toList(),
-    };
   }
 }
 
@@ -97,16 +78,6 @@ class Certificate {
       file: map['file'] ?? '',
     );
   }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'file': file,
-    };
-  }
-
   static List<Certificate> fromMapList(List<dynamic> list) {
     return list.map((item) => Certificate.fromMap(item)).toList();
   }

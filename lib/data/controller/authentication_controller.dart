@@ -1,5 +1,6 @@
 import 'package:fluffypawsm/core/auth/hive_service.dart';
 import 'package:fluffypawsm/core/utils/api_client.dart';
+import 'package:fluffypawsm/data/controller/dashboard_controller.dart';
 import 'package:fluffypawsm/data/controller/profile_controller.dart';
 import 'package:fluffypawsm/data/models/authentication/settings.dart';
 import 'package:fluffypawsm/data/models/authentication/signup_model.dart';
@@ -37,35 +38,50 @@ class AuthenticationController extends StateNotifier<bool> {
       final response = await ref
           .read(authServiceProvider)
           .login(contact: contact, password: password);
-      //final userInfo = User.fromMap(response.data['data']);
 
       if (response.statusCode != 200) {
         state = false;
         return false;
       }
-      final accessToken = response.data['data'];
-      Map<String, dynamic> decodedToken = JwtDecoder.decode(accessToken);
 
-      // Kiểm tra role nếu là "PetOwner" thì trả về false
-      String? role = decodedToken[
-          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-      if (role == "PetOwner") {
+      final accessToken = response.data['data'] as String;
+
+      // Làm sạch token trước khi decode
+      final cleanToken = accessToken.trim().replaceAll(RegExp(r'\s+'), '');
+
+      try {
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(cleanToken);
+        String? role = decodedToken[
+            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+        if (role == "PetOwner") {
+          state = false;
+          return false;
+        }
+
+        // Lưu token và xử lý theo role
+        await ref
+            .read(hiveStoreService)
+            .saveUserAuthToken(authToken: cleanToken);
+
+        if (role == "StoreManager") {
+          ref.read(apiClientProvider).updateToken(token: cleanToken);
+          state = false;
+          return true;
+        } else {
+          ref.read(apiClientProvider).updateToken(token: cleanToken);
+          await ref.read(profileController.notifier).getAccountDetails();
+          ref.read(dashboardController.notifier).getDashboardInfo();
+          state = false;
+          return true;
+        }
+      } catch (e) {
+        debugPrint("JWT decode error: $e");
         state = false;
-        return false; // Nếu role là "PetOwner", trả về false
-      } else if (role == "StoreManager") {
-        state = false;
-        return true;
-      } else {
-        ref.read(hiveStoreService).saveUserAuthToken(authToken: accessToken);
-        ref.read(apiClientProvider).updateToken(token: accessToken);
-        await ref.read(profileController.notifier).getAccountDetails();
-        state = false;
-        return true;
+        return false;
       }
-
-      //ref.read(hiveStoreService).saveUserInfo(userInfo: userInfo);
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("Login error: $e");
       state = false;
       return false;
     }

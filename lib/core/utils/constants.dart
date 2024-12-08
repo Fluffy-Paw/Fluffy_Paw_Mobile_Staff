@@ -37,6 +37,13 @@ class AppConstants {
   static const String getStatisticsUrl =
       '$baseUrl/api/Dashboard/GetAllStaticsSM';
   static const String getAlStoreSM='$baseUrl/api/StoreManager/GetAllStoreBySM';
+  static const String getAllBookingByStoreSM='$baseUrl/api/StoreManager/GetAllBookingByStore';
+  static const String getAllServiceBySM='$baseUrl/api/Service/GetAllServiceBySM';
+  static const String createCertificate='$baseUrl/api/Certificate/CreateCertificate';
+  static const String createService='$baseUrl/api/Service/CreateService';
+  static const String updateService='$baseUrl/api/Service/UpdateService';
+  static const String getCertificatesByServiceId = '$baseUrl/api/Certificate/GetAllCertificateByServiceId';
+  static const String deleteCertificate = '$baseUrl/api/Certificate/DeleteCertificate';
 
 
 

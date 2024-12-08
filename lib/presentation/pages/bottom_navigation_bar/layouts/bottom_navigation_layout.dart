@@ -10,6 +10,8 @@ import 'package:fluffypawsm/presentation/pages/order/order_view.dart';
 import 'package:fluffypawsm/presentation/pages/profile/profile_view.dart';
 import 'package:fluffypawsm/presentation/pages/services/service_view.dart';
 import 'package:fluffypawsm/presentation/pages/statisticSM/static_view.dart';
+import 'package:fluffypawsm/presentation/pages/store_manager/booking/booking_dashboard_screen.dart';
+import 'package:fluffypawsm/presentation/pages/store_manager/services/service_screen.dart';
 import 'package:fluffypawsm/presentation/pages/store_manager/store/store_list_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,6 +50,12 @@ class _BottomNavigationLayoutState extends ConsumerState<BottomNavigationLayout>
       setState(() {
         userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
       });
+      
+      // Set initial index based on role
+      if (userRole == "StoreManager") {
+        ref.read(selectedIndexProvider.notifier).state = 0; // StaticView index
+        ref.read(bottomTabControllerProvider).jumpToPage(0);
+      }
     }
   }
 
@@ -79,8 +87,8 @@ class _BottomNavigationLayoutState extends ConsumerState<BottomNavigationLayout>
     if (userRole == "StoreManager") {
       return const [
         StaticView(),
-         OrderView(),
-         ServiceView(),
+         BookingDashboardScreen(),
+         ServiceManagementScreen(),
          StoreListView(),
         // ProfileView(),
       ];
@@ -89,6 +97,7 @@ class _BottomNavigationLayoutState extends ConsumerState<BottomNavigationLayout>
     return const [
       DashboardView(),
       OrderView(),
+      ServiceView(),
       ConversationScreen(),
       ProfileView(),
     ];
