@@ -14,6 +14,8 @@ import 'package:fluffypawsm/presentation/pages/services/create_store_service_vie
 import 'package:fluffypawsm/presentation/pages/services/service_detail_view.dart';
 import 'package:fluffypawsm/presentation/pages/services/service_list_view.dart';
 import 'package:fluffypawsm/presentation/pages/splash_screen/splash_view.dart';
+import 'package:fluffypawsm/presentation/pages/store_manager/profile/store_manager_profile_layout.dart';
+import 'package:fluffypawsm/presentation/pages/store_manager/profile/store_manager_profile_view.dart';
 import 'package:fluffypawsm/presentation/pages/store_manager/store/store_list_view.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
@@ -34,6 +36,7 @@ class Routes{
   static const underReviewAccount = '/underReviewAccount';
   static const serviceListByBrand = '/serviceListByBrand';
   static const storeList = '/storeList';
+  static const storeManagerProfile = '/storeManagerProfile';
 }
 class StoreServiceRouteArgs {
   final int serviceId;
@@ -70,6 +73,9 @@ Route generatedRoutes(RouteSettings settings){
       break;
     case Routes.sellerAccount:
       child = const SellerAccountView();
+      break;
+    case Routes.storeManagerProfile:
+      child = const StoreManagerProfileView();
       break;
     case Routes.serviceListByBrand:
       child = const ServiceListView();

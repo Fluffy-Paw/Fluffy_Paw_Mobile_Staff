@@ -10,6 +10,7 @@ import 'package:fluffypawsm/core/utils/global_function.dart';
 import 'package:fluffypawsm/core/utils/theme.dart';
 import 'package:fluffypawsm/data/controller/profile_controller.dart';
 import 'package:fluffypawsm/data/models/profile/profile.dart';
+import 'package:fluffypawsm/data/models/profile/store_manager.dart';
 import 'package:fluffypawsm/dependency_injection/dependency_injection.dart';
 import 'package:fluffypawsm/presentation/pages/profile/components/language.dart';
 import 'package:fluffypawsm/presentation/pages/profile/components/menu_card.dart';
@@ -23,6 +24,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:gap/gap.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ProfileLayout extends ConsumerStatefulWidget {
@@ -80,15 +82,35 @@ class _ProfileLayoutState extends ConsumerState<ProfileLayout> {
     );
   }
 
+  Future<String> userRole() async {
+    final token = await ref.read(hiveStoreService).getAuthToken();
+    final decodedToken = JwtDecoder.decode(token!);
+    final userRole = decodedToken[
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+        return userRole;
+  }
+
   Widget _buildHeaderWidget(
       {required BuildContext context, required WidgetRef ref}) {
     return ValueListenableBuilder(
         valueListenable: Hive.box(AppConstants.userBox).listenable(),
         builder: (context, userBox, _) {
-          Map<dynamic, dynamic>? userInfo = userBox.get(AppConstants.userData);
+          final userInfo = userBox.get(AppConstants.userData);
+          if (userInfo == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
           Map<String, dynamic> userInfoStringKeys =
-              userInfo!.cast<String, dynamic>();
-          User user = User.fromMap(userInfoStringKeys);
+              userInfo.cast<String, dynamic>();
+          dynamic user;
+          String role = userRole().toString();
+
+          if (role == 'Staff') {
+            user = User.fromMap(userInfoStringKeys);
+          } else {
+            user = StoreManagerProfileModel.fromMap(userInfoStringKeys);
+          }
+
           return Stack(
             children: [
               Container(
@@ -103,16 +125,18 @@ class _ProfileLayoutState extends ConsumerState<ProfileLayout> {
                       children: [
                         CircleAvatar(
                           radius: 40.sp,
-                          backgroundImage:
-                              CachedNetworkImageProvider(user.account.avatar),
+                          backgroundImage: role == 'Staff'
+                              ? CachedNetworkImageProvider(user.account.avatar)
+                              : CachedNetworkImageProvider(user.logo),
                         ),
                         Positioned(
                           right: -10,
                           bottom: 0,
                           child: CircleAvatar(
                             radius: 16.sp,
-                            backgroundImage:
-                                CachedNetworkImageProvider(user.brandName),
+                            backgroundImage: role == 'Staff'
+                                ? CachedNetworkImageProvider(user.brandName)
+                                : CachedNetworkImageProvider(user.logo),
                           ),
                         )
                       ],
@@ -121,7 +145,9 @@ class _ProfileLayoutState extends ConsumerState<ProfileLayout> {
                     Row(
                       children: [
                         Text(
-                          "${user.account.username} ${user.account.roleName}",
+                          role == 'Staff'
+                              ? "${user.account.username} ${user.account.roleName}"
+                              : user.fullName,
                           style: AppTextStyle(context).title,
                         ),
                         Gap(10.w),
@@ -133,7 +159,7 @@ class _ProfileLayoutState extends ConsumerState<ProfileLayout> {
                         ),
                         Gap(10.w),
                         Text(
-                          user.brandName,
+                          role == 'Staff' ? user.brandName : user.name,
                           style: AppTextStyle(context)
                               .bodyTextSmall
                               .copyWith(fontWeight: FontWeight.w500),
@@ -142,7 +168,7 @@ class _ProfileLayoutState extends ConsumerState<ProfileLayout> {
                     ),
                     Gap(10.h),
                     Text(
-                      user.account.email,
+                      role == 'Staff' ? user.account.email : user.brandEmail,
                       style: AppTextStyle(context).bodyTextSmall.copyWith(),
                     ),
                     Gap(14.h),
@@ -227,11 +253,8 @@ class _ProfileLayoutState extends ConsumerState<ProfileLayout> {
                   inactiveTextFontWeight: FontWeight.w400,
                   activeTextFontWeight: FontWeight.w400,
                   showOnOff: true,
-                  //value: ref.watch(shopStatus),
                   value: true,
-                  onToggle: (v) {
-                    //ref.read(shopStatus.notifier).state = v;
-                  },
+                  onToggle: (v) {},
                 ),
               )
             ],
@@ -282,7 +305,11 @@ class _ProfileLayoutState extends ConsumerState<ProfileLayout> {
                     icon: Assets.svg.sellerProfile,
                     text: S.of(context).sellerProfile,
                     onTap: () {
-                      context.nav.pushNamed(Routes.sellerAccount);
+                      if (userRole() == 'Staff') {
+                        context.nav.pushNamed(Routes.sellerAccount);
+                      } else {
+                        context.nav.pushNamed(Routes.storeManagerProfile);
+                      }
                     },
                   ),
                   const Divider(

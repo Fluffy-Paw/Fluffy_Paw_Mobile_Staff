@@ -1,15 +1,94 @@
 import 'package:fluffypawsm/core/utils/app_color.dart';
 import 'package:fluffypawsm/core/utils/app_text_style.dart';
+import 'package:fluffypawsm/data/controller/account_controller.dart';
 import 'package:fluffypawsm/data/models/store/store_model.dart';
+import 'package:fluffypawsm/presentation/widgets/component/custom_button.dart';
+import 'package:fluffypawsm/presentation/widgets/component/custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
 
-class AccountDetailScreen extends StatelessWidget {
-  final AccountModel account;
+class AccountDetailScreen extends ConsumerStatefulWidget {
+  final AccountModel store;
+  const AccountDetailScreen({Key? key, required this.store}) : super(key: key);
 
-  const AccountDetailScreen({Key? key, required this.account}) : super(key: key);
+  @override
+  ConsumerState<AccountDetailScreen> createState() =>
+      _AccountDetailScreenState();
+}
+
+class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
+  bool isEditing = false;
+  bool isUpdatingPassword = false;
+  final _formKey = GlobalKey<FormBuilderState>();
+  late TextEditingController usernameController;
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
+  late TextEditingController confirmPasswordController;
+
+  @override
+  void initState() {
+    super.initState();
+    _initControllers();
+  }
+
+  void _initControllers() {
+    usernameController = TextEditingController(text: widget.store.username);
+    emailController = TextEditingController(text: widget.store.email);
+    passwordController = TextEditingController();
+    confirmPasswordController = TextEditingController();
+  }
+
+  Future<void> _handleUpdateProfile() async {
+    if (_formKey.currentState?.saveAndValidate() ?? false) {
+      final result = await ref.read(accountController.notifier).updateStaff(
+            id: widget.store.id.toString(),
+            
+            email: emailController.text,
+          );
+
+      if (result && mounted) {
+        setState(() {
+          isEditing = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully')),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleUpdatePassword() async {
+    if (_formKey.currentState?.saveAndValidate() ?? false) {
+      if (passwordController.text != confirmPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Passwords do not match')),
+        );
+        return;
+      }
+
+      final result = await ref.read(accountController.notifier).updateStaff(
+            id: widget.store.id.toString(),
+           
+            password: passwordController.text,
+            confirmPassword: confirmPasswordController.text,
+            email: widget.store.email,
+          );
+
+      if (result && mounted) {
+        setState(() {
+          isUpdatingPassword = false;
+          passwordController.clear();
+          confirmPasswordController.clear();
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password updated successfully')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +100,31 @@ class AccountDetailScreen extends StatelessWidget {
             expandedHeight: 300.h,
             pinned: true,
             backgroundColor: Colors.transparent,
-            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+            actions: [
+              if (!isUpdatingPassword)
+                IconButton(
+                  icon: Icon(
+                    isEditing ? Icons.check : Icons.edit,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    if (isEditing) {
+                      _handleUpdateProfile();
+                    } else {
+                      setState(() {
+                        isEditing = true;
+                      });
+                    }
+                  },
+                ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 children: [
-                  // Gradient background
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -33,64 +132,48 @@ class AccountDetailScreen extends StatelessWidget {
                         end: Alignment.bottomRight,
                         colors: [
                           AppColor.violetColor,
-                          Color(0xFF8B5CF6),
-                          Color(0xFF7C3AED),
+                          const Color(0xFF8B5CF6),
+                          const Color(0xFF7C3AED),
                         ],
                       ),
                     ),
                   ),
-                  // Decorative patterns
                   Positioned.fill(
                     child: CustomPaint(
                       painter: CirclePatternPainter(),
                     ),
                   ),
-                  // Profile content
                   Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          padding: EdgeInsets.all(4.w),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: CircleAvatar(
-                            radius: 60.r,
-                            backgroundImage: NetworkImage(account.avatar),
-                            backgroundColor: Colors.white.withOpacity(0.2),
-                          ),
+                        CircleAvatar(
+                          radius: 60.r,
+                          backgroundImage: NetworkImage(widget.store.avatar),
                         ),
                         Gap(16.h),
                         Text(
-                          account.username,
+                          widget.store.username,
                           style: AppTextStyle(context).title.copyWith(
-                            fontSize: 28.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                                color: Colors.white,
+                                fontSize: 24.sp,
+                              ),
                         ),
                         Gap(8.h),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 8.h,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(20.r),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.verified, color: Colors.white, size: 16.sp),
-                              Gap(4.w),
-                              Text(
-                                account.roleName,
-                                style: AppTextStyle(context).bodyTextSmall.copyWith(
+                          child: Text(
+                            widget.store.roleName,
+                            style: AppTextStyle(context).bodyText.copyWith(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.w500,
                                 ),
-                              ),
-                            ],
                           ),
                         ),
                       ],
@@ -106,79 +189,38 @@ class AccountDetailScreen extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   color: AppColor.whiteColor,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(30.r),
+                  ),
                 ),
-                child: Column(
-                  children: [
-                    // Status Cards
-                    Padding(
-                      padding: EdgeInsets.all(20.w),
-                      child: Row(
-                        children: [
-                          _buildStatusCard(
-                            context,
-                            icon: Icons.how_to_reg,
-                            title: 'Status',
-                            value: account.status == 1 ? 'Active' : 'Inactive',
-                            color: account.status == 1 ? Colors.green : Colors.red,
-                            gradient: LinearGradient(
-                              colors: account.status == 1 
-                                ? [Colors.green.withOpacity(0.1), Colors.green.withOpacity(0.05)]
-                                : [Colors.red.withOpacity(0.1), Colors.red.withOpacity(0.05)],
-                            ),
-                          ),
-                          Gap(16.w),
-                          _buildStatusCard(
-                            context,
-                            icon: Icons.calendar_today,
-                            title: 'Member Since',
-                            value: DateFormat('MMM yyyy').format(account.createDate),
-                            color: AppColor.violetColor,
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColor.violetColor.withOpacity(0.1),
-                                AppColor.violetColor.withOpacity(0.05),
-                              ],
-                            ),
+                child: FormBuilder(
+                  key: _formKey,
+                  child: Padding(
+                    padding: EdgeInsets.all(20.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildProfileSection(),
+                        Gap(24.h),
+                        _buildPasswordSection(),
+                        if (isEditing || isUpdatingPassword) ...[
+                          Gap(24.h),
+                          CustomButton(
+                            buttonText: 'Cancel',
+                            buttonColor: Colors.grey,
+                            onPressed: () {
+                              setState(() {
+                                isEditing = false;
+                                isUpdatingPassword = false;
+                                _initControllers();
+                              });
+                            },
                           ),
                         ],
-                      ),
+                        Gap(20.h),
+                      ],
                     ),
-                    // Info Sections
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      child: Column(
-                        children: [
-                          _buildSection(
-                            context,
-                            title: 'Personal Information',
-                            items: [
-                              _buildInfoTile(
-                                context,
-                                icon: Icons.email_outlined,
-                                title: 'Email',
-                                value: account.email,
-                              ),
-                              _buildInfoTile(
-                                context,
-                                icon: Icons.badge_outlined,
-                                title: 'Account ID',
-                                value: '#${account.id}',
-                              ),
-                              _buildInfoTile(
-                                context,
-                                icon: Icons.password_outlined,
-                                title: 'Password Hash',
-                                value: account.password,
-                                isPassword: true,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Gap(20.h),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -188,162 +230,202 @@ class AccountDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-    required Gradient gradient,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          gradient: gradient,
-          borderRadius: BorderRadius.circular(20.r),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.1),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(icon, color: color, size: 20.sp),
-            ),
-            Gap(12.h),
-            Text(
-              title,
-              style: AppTextStyle(context).bodyTextSmall.copyWith(
-                color: AppColor.gray,
-              ),
-            ),
-            Gap(4.h),
-            Text(
-              value,
-              style: AppTextStyle(context).bodyText.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required List<Widget> items,
-  }) {
+  Widget _buildProfileSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildDivider(),
         Text(
-          title,
-          style: AppTextStyle(context).title.copyWith(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.bold,
-          ),
+          'Profile Information',
+          style: AppTextStyle(context).title,
         ),
         Gap(16.h),
         Container(
+          padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(12.r),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
                 blurRadius: 10,
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Column(children: items),
+          child: Column(
+            children: [
+              
+              _buildInfoField(
+                icon: Icons.person,
+                title: 'Username',
+                controller: usernameController,
+                enabled: isEditing,
+                readOnly: true,
+              ),
+              _buildDivider(),
+              _buildInfoField(
+                icon: Icons.email,
+                title: 'Email',
+                controller: emailController,
+                enabled: isEditing,
+              ),
+              //  _buildDivider(),
+              //  _buildInfoField(
+              //    icon: Icons.business,
+              //    title: 'Brand Name',
+              //    controller: TextEditingController(text: widget.store.brandName),
+              //    enabled: false,
+              //  ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildInfoTile(
-    BuildContext context, {
+  Widget _buildPasswordSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Password',
+              style: AppTextStyle(context).title,
+            ),
+            if (!isEditing && !isUpdatingPassword)
+              TextButton.icon(
+                icon: const Icon(Icons.lock_outline),
+                label: const Text('Change Password'),
+                onPressed: () {
+                  setState(() {
+                    isUpdatingPassword = true;
+                  });
+                },
+              ),
+          ],
+        ),
+        if (isUpdatingPassword) ...[
+          Gap(16.h),
+          Container(
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                _buildInfoField(
+                  icon: Icons.lock,
+                  title: 'New Password',
+                  controller: passwordController,
+                  enabled: true,
+                  isPassword: true,
+                ),
+                _buildDivider(),
+                _buildInfoField(
+                  icon: Icons.lock_outline,
+                  title: 'Confirm Password',
+                  controller: confirmPasswordController,
+                  enabled: true,
+                  isPassword: true,
+                ),
+                Gap(16.h),
+                CustomButton(
+                  buttonText: 'Update Password',
+                  onPressed: _handleUpdatePassword,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildInfoField({
     required IconData icon,
     required String title,
-    required String value,
+    required TextEditingController controller,
+    required bool enabled,
+    bool readOnly = false,
     bool isPassword = false,
   }) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.withOpacity(0.1)),
-        ),
-      ),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
         children: [
           Container(
             padding: EdgeInsets.all(10.w),
             decoration: BoxDecoration(
               color: AppColor.violetColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(8.r),
             ),
-            child: Icon(icon, color: AppColor.violetColor, size: 20.sp),
+            child: Icon(
+              icon,
+              color: AppColor.violetColor,
+              size: 20.sp,
+            ),
           ),
-          Gap(16.w),
+          Gap(12.w),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyle(context).bodyTextSmall.copyWith(
-                    color: AppColor.gray,
-                  ),
-                ),
-                Gap(4.h),
-                if (isPassword)
-                  Text(
-                    value.substring(0, 20) + '...',
-                    style: AppTextStyle(context).bodyTextSmall.copyWith(
-                      fontFamily: 'Monospace',
-                      color: AppColor.blackColor.withOpacity(0.7),
-                    ),
+            child: enabled
+                ? CustomTextFormField(
+                    name: title.toLowerCase().replaceAll(' ', '_'),
+                    hintText: title,
+                    textInputType: TextInputType.text,
+                    controller: controller,
+                    textInputAction: TextInputAction.next,
+                    readOnly: readOnly,
+                    obscureText: isPassword,
+                    validator: (value) {
+                      if (value?.isEmpty ?? true) {
+                        return 'This field is required';
+                      }
+                      if (isPassword && value!.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      return null;
+                    },
                   )
-                else
-                  Text(
-                    value,
-                    style: AppTextStyle(context).bodyText.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: AppTextStyle(context).bodyTextSmall.copyWith(
+                              color: AppColor.gray,
+                            ),
+                      ),
+                      Text(
+                        isPassword ? '••••••••' : controller.text,
+                        style: AppTextStyle(context).bodyText,
+                      ),
+                    ],
                   ),
-              ],
-            ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildDivider() {
+    return Divider(
+      color: Colors.grey[200],
+      height: 16.h,
+    );
+  }
 }
 
-// Custom painter for decorative background pattern
 class CirclePatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {

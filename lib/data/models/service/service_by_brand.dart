@@ -9,7 +9,7 @@ class ServiceModel {
   final double cost;
   final String description;
   final int bookingCount;
-  final int totalRating;
+  final double totalRating;
   final bool status;
   final String serviceTypeName;
   final List<Certificate> certificate;
@@ -43,7 +43,7 @@ class ServiceModel {
       cost: (map['cost'] ?? 0).toDouble(),
       description: map['description'] ?? '',
       bookingCount: map['bookingCount'] ?? 0,
-      totalRating: map['totalRating'] ?? 0,
+      totalRating: (map['totalRating'] ?? 0).toDouble(),
       status: map['status'] ?? false,
       serviceTypeName: map['serviceTypeName'] ?? '',
       certificate: (map['certificate'] as List<dynamic>?)

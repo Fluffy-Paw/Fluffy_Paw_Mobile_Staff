@@ -90,7 +90,7 @@ class _BottomNavigationLayoutState extends ConsumerState<BottomNavigationLayout>
          BookingDashboardScreen(),
          ServiceManagementScreen(),
          StoreListView(),
-        // ProfileView(),
+         ProfileView(),
       ];
     }
     // Staff views

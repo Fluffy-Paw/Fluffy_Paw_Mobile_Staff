@@ -2,6 +2,7 @@ import 'package:fluffypawsm/core/utils/app_color.dart';
 import 'package:fluffypawsm/core/utils/app_text_style.dart';
 import 'package:fluffypawsm/data/controller/service_brand_controller.dart';
 import 'package:fluffypawsm/data/models/service/service_by_brand.dart';
+import 'package:fluffypawsm/presentation/pages/store_manager/services/create_service.dart';
 import 'package:fluffypawsm/presentation/pages/store_manager/services/service_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -112,8 +113,13 @@ class _ServiceManagementScreenState extends ConsumerState<ServiceManagementScree
   }
 
   void _handleAdd() {
-    // Navigate to add service screen
-  }
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const CreateServiceScreen(),
+    ),
+  );
+}
 
   void _handleEdit(ServiceModel service) {
     // Navigate to edit service screen

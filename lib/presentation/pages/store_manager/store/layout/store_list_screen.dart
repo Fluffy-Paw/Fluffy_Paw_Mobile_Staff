@@ -2,6 +2,7 @@ import 'package:fluffypawsm/core/utils/app_color.dart';
 import 'package:fluffypawsm/core/utils/app_text_style.dart';
 import 'package:fluffypawsm/data/controller/store_controller.dart';
 import 'package:fluffypawsm/data/models/store/store_model.dart';
+import 'package:fluffypawsm/presentation/pages/store_manager/store/layout/create_store_screen.dart';
 import 'package:fluffypawsm/presentation/pages/store_manager/store/layout/store_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,279 +17,255 @@ class StoreListScreen extends ConsumerStatefulWidget {
 }
 
 class _StoreListScreenState extends ConsumerState<StoreListScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    Future.microtask(() {
       ref.read(storeController.notifier).getAllStores();
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     final stores = ref.watch(storeController.notifier).stores;
     final isLoading = ref.watch(storeController);
 
     return Scaffold(
-      backgroundColor: AppColor.offWhiteColor,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: AppColor.whiteColor,
-        title: Text(
-          'Our Stores',
-          style: AppTextStyle(context).title.copyWith(
-            color: AppColor.blackColor,
-            fontSize: 24.sp,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+      backgroundColor: const Color(0xFFF4F4F5),
+      appBar: _buildAppBar(),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CreateStoreScreen(),
+            ),
+          );
+        },
+        backgroundColor: const Color(0xFF8B5CF6),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Store'),
       ),
-      body: Column(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _buildContent(stores ?? []),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
-            decoration: BoxDecoration(
-              color: AppColor.whiteColor,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20.r),
-                bottomRight: Radius.circular(20.r),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  spreadRadius: 1,
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search stores...',
-                hintStyle: AppTextStyle(context).bodyTextSmall.copyWith(
-                  color: AppColor.gray,
-                ),
-                prefixIcon: Icon(Icons.search, color: AppColor.violetColor),
-                filled: true,
-                fillColor: AppColor.offWhiteColor,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
+          Text(
+            'Store Management',
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
-          Expanded(
-            child: isLoading
-                ? Center(
-                    child: CircularProgressIndicator(
-                      color: AppColor.violetColor,
-                    ),
-                  )
-                : stores == null || stores.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.store_mall_directory_outlined,
-                              size: 80.sp,
-                              color: AppColor.gray,
-                            ),
-                            Gap(16.h),
-                            Text(
-                              'No stores found',
-                              style: AppTextStyle(context).bodyText.copyWith(
-                                color: AppColor.gray,
-                                fontSize: 16.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: EdgeInsets.all(16.w),
-                        itemCount: stores.length,
-                        itemBuilder: (context, index) {
-                          final store = stores[index];
-                          if (_searchQuery.isNotEmpty &&
-                              !store.name
-                                  .toLowerCase()
-                                  .contains(_searchQuery.toLowerCase())) {
-                            return SizedBox.shrink();
-                          }
-                          return StoreCard(store: store);
-                        },
-                      ),
+          Text(
+            'Browse all stores',
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: Colors.grey,
+            ),
           ),
         ],
       ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.filter_list, color: Colors.black),
+          onPressed: () {},
+        ),
+      ],
+      backgroundColor: Colors.white,
+      elevation: 0,
+    );
+  }
+
+  Widget _buildContent(List<StoreModel> stores) {
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.all(16.w),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => _StoreCard(store: stores[index]),
+              childCount: stores.length,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class StoreCard extends StatelessWidget {
+class _StoreCard extends StatelessWidget {
   final StoreModel store;
 
-  const StoreCard({Key? key, required this.store}) : super(key: key);
+  const _StoreCard({required this.store});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
-      decoration: BoxDecoration(
-        color: AppColor.whiteColor,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StoreDetailScreen(store: store),
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16.r),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => StoreDetailScreen(store: store),
-              ),
-            );
-          },
-          child: Padding(
-            padding: EdgeInsets.all(16.w),
-            child: Row(
-              children: [
-                Hero(
-                  tag: 'store_logo_${store.id}',
-                  child: Container(
-                    width: 90.w,
-                    height: 90.w,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 1,
-                          blurRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12.r),
-                      child: Image.network(
-                        store.logo,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: AppColor.gray.withOpacity(0.1),
-                            child: Icon(
-                              Icons.store,
-                              color: AppColor.gray,
-                              size: 40.sp,
-                            ),
-                          );
-                        },
-                      ),
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 16.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
+              child: AspectRatio(
+                aspectRatio: 16/9,
+                child: Image.network(
+                  store.logo,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Colors.grey[200],
+                    child: Icon(
+                      Icons.store,
+                      size: 40.sp,
+                      color: Colors.grey,
                     ),
                   ),
                 ),
-                Gap(16.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        store.name,
-                        style: AppTextStyle(context).title.copyWith(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColor.blackColor,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              store.name,
+                              style: TextStyle(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Gap(4.h),
+                            Text(
+                              store.brandName,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Gap(4.h),
-                      Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8.w,
-                              vertical: 4.h,
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.star,
+                              size: 16.sp,
+                              color: Colors.amber,
                             ),
-                            decoration: BoxDecoration(
-                              color: AppColor.violetColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6.r),
-                            ),
-                            child: Text(
-                              store.brandName,
-                              style: AppTextStyle(context).bodyTextSmall.copyWith(
-                                color: AppColor.violetColor,
-                                fontWeight: FontWeight.w500,
+                            Gap(4.w),
+                            Text(
+                              store.totalRating.toStringAsFixed(1),
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                          Gap(8.w),
-                          Icon(
-                            Icons.star,
-                            color: Colors.amber,
-                            size: 16.sp,
-                          ),
-                          Gap(4.w),
-                          Text(
-                            store.totalRating.toStringAsFixed(1),
-                            style: AppTextStyle(context).bodyTextSmall.copyWith(
-                              color: AppColor.blackColor,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Gap(8.h),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 16.sp,
-                            color: AppColor.gray,
-                          ),
-                          Gap(4.w),
-                          Expanded(
-                            child: Text(
-                              store.address,
-                              style: AppTextStyle(context).bodyTextSmall.copyWith(
-                                color: AppColor.gray,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppColor.gray,
-                  size: 16.sp,
-                ),
-              ],
+                  Gap(12.h),
+                  Row(
+                    children: [
+                      _buildInfoChip(
+                        Icons.location_on,
+                        store.address,
+                      ),
+                      Gap(12.w),
+                      _buildInfoChip(
+                        Icons.phone,
+                        store.phone,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String text) {
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 8.w,
+          vertical: 4.h,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFF8B5CF6).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 16.sp,
+              color: const Color(0xFF8B5CF6),
+            ),
+            Gap(4.w),
+            Expanded(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: const Color(0xFF8B5CF6),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
       ),
     );

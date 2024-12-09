@@ -65,11 +65,12 @@ class AuthenticationController extends StateNotifier<bool> {
             .saveUserAuthToken(authToken: cleanToken);
 
         if (role == "StoreManager") {
-          ref.read(apiClientProvider).updateToken(token: cleanToken);
+          ref.read(apiClientProvider).updateToken(token: accessToken);
+          await ref.read(profileController.notifier).getProfile();
           state = false;
           return true;
         } else {
-          ref.read(apiClientProvider).updateToken(token: cleanToken);
+          ref.read(apiClientProvider).updateToken(token: accessToken);
           await ref.read(profileController.notifier).getAccountDetails();
           ref.read(dashboardController.notifier).getDashboardInfo();
           state = false;

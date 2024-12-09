@@ -44,6 +44,9 @@ class AppConstants {
   static const String updateService='$baseUrl/api/Service/UpdateService';
   static const String getCertificatesByServiceId = '$baseUrl/api/Certificate/GetAllCertificateByServiceId';
   static const String deleteCertificate = '$baseUrl/api/Certificate/DeleteCertificate';
+  static const String createStore = '$baseUrl/api/StoreManager/CreateStore';
+  static const String getStoreManagerInfo = '$baseUrl/api/StoreManager/GetInfo';
+  static const String updateStoreManagerProfile = '$baseUrl/api/StoreManager/UpdateProfile';
 
 
 

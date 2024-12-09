@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffypawsm/data/controller/service_brand_controller.dart';
 import 'package:fluffypawsm/data/models/service/service_by_brand.dart';
+import 'package:fluffypawsm/presentation/pages/store_manager/services/update_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -35,24 +36,42 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: const Color(0xFFF4F4F5),
-    appBar: AppBar(
-      title: const Text('Service Details'),
-    ),
-    body: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildImageHeader(_service),  // Changed from widget.service
-          _buildServiceInfo(context, _service),  // Changed from widget.service
-          _buildCertificatesList(context, _service),  // Changed from widget.service
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F4F5),
+      appBar: AppBar(
+        title: const Text('Service Details'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UpdateServiceScreen(service: _service),
+                ),
+              ).then((updatedService) {
+                if (updatedService != null) {
+                  _updateService(updatedService as ServiceModel);
+                }
+              });
+            },
+          ),
         ],
       ),
-    ),
-  );
-}
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildImageHeader(_service), // Changed from widget.service
+            _buildServiceInfo(context, _service), // Changed from widget.service
+            _buildCertificatesList(
+                context, _service), // Changed from widget.service
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildImageHeader(ServiceModel service) {
     return Stack(

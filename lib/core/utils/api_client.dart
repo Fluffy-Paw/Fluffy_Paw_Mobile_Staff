@@ -71,7 +71,7 @@ class ApiClient{
   }
   Future<Response> patch(
     String url, {
-    Map<String, dynamic>? data,
+    dynamic data,
     Map<String, dynamic>? headers,
   }) async {
     return _dio.patch(

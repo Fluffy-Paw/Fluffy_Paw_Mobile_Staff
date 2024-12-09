@@ -242,7 +242,7 @@ class StoreDetailScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AccountDetailScreen(account: store.account),
+              builder: (context) => AccountDetailScreen(store: store.account),
             ),
           );
         },

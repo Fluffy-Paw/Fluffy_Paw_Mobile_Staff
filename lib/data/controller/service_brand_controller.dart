@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fluffypawsm/data/models/service/service_by_brand.dart';
+import 'package:fluffypawsm/data/models/service/service_type_model.dart';
 import 'package:fluffypawsm/data/repositories/service_brand_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,10 @@ class ServiceController extends StateNotifier<bool> {
   final Ref ref;
   List<ServiceModel>? _services;
   List<ServiceModel>? get services => _services;
+  List<ServiceTypeModel>? _serviceTypes;
+  List<ServiceTypeModel>? get serviceTypes => _serviceTypes;
+  bool _loadingServiceTypes = false;
+  bool get loadingServiceTypes => _loadingServiceTypes;
 
   ServiceController(this.ref) : super(false);
 
@@ -45,7 +50,8 @@ class ServiceController extends StateNotifier<bool> {
     );
   }
 
-  Future<bool> createService({
+  // In ServiceController class
+  Future<int?> createService({
     required int serviceTypeId,
     required String name,
     required File image,
@@ -71,43 +77,65 @@ class ServiceController extends StateNotifier<bool> {
           await ref.read(serviceServiceProvider).createService(formData);
       await getAllServices(); // Refresh services list after creation
       state = false;
-      return response.statusCode == 200;
+
+      if (response.statusCode == 200) {
+        // Assuming the response contains the created service ID in data
+        return response.data['data']['id'] as int;
+      }
+      return null;
     } catch (e) {
       state = false;
       debugPrint('Error creating service: $e');
-      return false;
+      return null;
     }
   }
 
   Future<bool> updateService({
-    required int id,
-    required int serviceTypeId,
-    required String name,
-    required File? image,
-    required Duration duration,
-    required double cost,
-    required String description,
-  }) async {
-    try {
-      state = true;
-      final response = await ref.read(serviceServiceProvider).updateService(
-            id: id,
-            serviceTypeId: serviceTypeId,
-            name: name,
-            image: image,
-            duration: duration,
-            cost: cost,
-            description: description,
-          );
-      await getAllServices(); // Refresh services list after update
-      state = false;
-      return response.statusCode == 200;
-    } catch (e) {
-      state = false;
-      debugPrint('Error updating service: $e');
-      return false;
+  required int id,
+  required int serviceTypeId, 
+  required String name,
+  required File? image,
+  required String duration,
+  required double cost,
+  required String description,
+}) async {
+  try {
+    state = true;
+    FormData formData = FormData.fromMap({
+      'ServiceTypeId': serviceTypeId.toString(),
+      'Name': name,
+      'Duration': duration,
+      'Cost': cost.toString(), 
+      'Description': description,
+    });
+
+    if (image != null) {
+      formData.files.add(
+        MapEntry(
+          'Image',
+          await MultipartFile.fromFile(
+            image.path,
+            filename: image.path.split('/').last,
+          ),
+        ),
+      );
     }
+
+    final response = await ref.read(serviceServiceProvider).updateService(formData, id);
+    await getAllServices(); // Refresh services list after update
+    state = false;
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return true;
+    }
+    return false;
+
+  } catch (e) {
+    state = false;
+    debugPrint('Error updating service: $e');
+    rethrow;
   }
+}
 
   Future<List<Certificate>> getCertificatesByServiceId(int serviceId) async {
     try {
@@ -175,6 +203,32 @@ class ServiceController extends StateNotifier<bool> {
       debugPrint('Error deleting certificate: $e');
       return false;
     }
+  }
+
+  Future<void> getAllServiceTypes() async {
+    try {
+      _loadingServiceTypes = true;
+      state = true;
+      final response =
+          await ref.read(serviceServiceProvider).getAllServiceTypes();
+      if (response.statusCode == 200) {
+        _serviceTypes = ServiceTypeModel.fromMapList(response.data['data']);
+      }
+      _loadingServiceTypes = false;
+      state = false;
+    } catch (e) {
+      _loadingServiceTypes = false;
+      state = false;
+      debugPrint('Error getting service types: $e');
+      rethrow;
+    }
+  }
+
+  ServiceTypeModel? getServiceTypeById(int id) {
+    return _serviceTypes?.firstWhere(
+      (type) => type.id == id,
+      orElse: () => throw Exception('Service type not found'),
+    );
   }
 }
 

@@ -4,15 +4,16 @@ class ServiceModel {
   final int brandId;
   final String brandName;
   final String name;
+  final int revenue;
   final String image;
   final String duration;
-  final double cost;
+  final int cost;
   final String description;
   final int bookingCount;
-  final double totalRating;
+  final double totalRating;  // Changed to double
   final bool status;
   final String serviceTypeName;
-  final List<Certificate> certificates;
+  final List<Certificate> certificate;
 
   ServiceModel({
     required this.id,
@@ -20,6 +21,7 @@ class ServiceModel {
     required this.brandId,
     required this.brandName,
     required this.name,
+    required this.revenue,
     required this.image,
     required this.duration,
     required this.cost,
@@ -28,7 +30,7 @@ class ServiceModel {
     required this.totalRating,
     required this.status,
     required this.serviceTypeName,
-    required this.certificates,
+    required this.certificate,
   });
 
   factory ServiceModel.fromMap(Map<String, dynamic> map) {
@@ -38,22 +40,24 @@ class ServiceModel {
       brandId: map['brandId'] ?? 0,
       brandName: map['brandName'] ?? '',
       name: map['name'] ?? '',
+      revenue: map['revenue'] ?? 0,
       image: map['image'] ?? '',
       duration: map['duration'] ?? '',
-      cost: (map['cost'] ?? 0).toDouble(),
+      cost: map['cost'] ?? 0,
       description: map['description'] ?? '',
       bookingCount: map['bookingCount'] ?? 0,
-      totalRating: (map['totalRating'] ?? 0).toDouble(),
+      totalRating: (map['totalRating'] ?? 0).toDouble(), // Convert to double here
       status: map['status'] ?? false,
       serviceTypeName: map['serviceTypeName'] ?? '',
-      certificates: (map['certificate'] as List?)
-          ?.map((cert) => Certificate.fromMap(cert))
-          .toList() ?? [],
+      certificate: map['certificate'] != null
+          ? List<Certificate>.from(
+              map['certificate'].map((x) => Certificate.fromMap(x)))
+          : [],
     );
   }
 
   static List<ServiceModel> fromMapList(List<dynamic> list) {
-    return list.map((item) => ServiceModel.fromMap(item)).toList();
+    return List<ServiceModel>.from(list.map((map) => ServiceModel.fromMap(map)));
   }
 }
 

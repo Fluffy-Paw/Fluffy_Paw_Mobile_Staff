@@ -1,9 +1,12 @@
 import 'package:fluffypawsm/core/utils/constants.dart';
 import 'package:fluffypawsm/data/models/conversation/conversation_model.dart';
 import 'package:fluffypawsm/data/models/profile/profile.dart';
+import 'package:fluffypawsm/data/models/profile/store_manager.dart';
 import 'package:fluffypawsm/data/models/service/service_by_brand.dart';
+import 'package:fluffypawsm/presentation/pages/store_manager/profile/store_manager_profile_layout.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class HiveService {
   final Ref ref;
@@ -48,20 +51,39 @@ class HiveService {
   }
 
   // save user information
-  Future saveUserInfo({required User userInfo}) async {
+  Future saveUserInfo({required dynamic userInfo}) async {
     final userBox = await Hive.openBox(AppConstants.userBox);
     userBox.put(AppConstants.userData, userInfo.toMap());
   }
+  Future<String> userRole() async {
+    final token = await ref.read(hiveStoreService).getAuthToken();
+    final decodedToken = JwtDecoder.decode(token!);
+    final userRole = decodedToken[
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+        return userRole;
+  }
 
   // get user information
-  Future<User?> getUserInfo() async {
+  Future<dynamic> getUserInfo() async {
     final userBox = await Hive.openBox(AppConstants.userBox);
     Map<dynamic, dynamic>? userInfo = userBox.get(AppConstants.userData);
     if (userInfo != null) {
-      Map<String, dynamic> userInfoStringKeys =
-          userInfo.cast<String, dynamic>();
-      User user = User.fromMap(userInfoStringKeys);
-      return user;
+      // final token = getAuthToken();
+      // final decodedToken = JwtDecoder.decode(token.toString());
+      // final userRole = decodedToken[
+      //     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+      String role = userRole().toString();
+      if (role == "Staff") {
+        Map<String, dynamic> userInfoStringKeys =
+            userInfo.cast<String, dynamic>();
+        User user = User.fromMap(userInfoStringKeys);
+        return user;
+      } else {
+        Map<String, dynamic> userInfoStringKeys =
+            userInfo.cast<String, dynamic>();
+        StoreManagerProfileModel user = StoreManagerProfileModel.fromMap(userInfoStringKeys);
+        return user;
+      }
     }
     return null;
   }
