@@ -40,7 +40,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F4F5),
       appBar: AppBar(
-        title: const Text('Service Details'),
+        title: const Text('Chi tiết dịch vụ'),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -140,16 +140,16 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoRow(Icons.access_time, 'Duration', service.duration),
+          _buildInfoRow(Icons.access_time, 'Thời lượng', service.duration),
           Divider(height: 24.h),
-          _buildInfoRow(Icons.attach_money, 'Cost', '\$${service.cost}'),
+          _buildInfoRow(Icons.attach_money, 'Giá cả', '\$${service.cost}'),
           Divider(height: 24.h),
           _buildInfoRow(
-              Icons.book, 'Total Bookings', '${service.bookingCount}'),
+              Icons.book, 'Tổng số đơn đặt', '${service.bookingCount}'),
           if (service.description.isNotEmpty) ...[
             Divider(height: 24.h),
             Text(
-              'Description',
+              'Mô tả',
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
@@ -208,7 +208,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Certificates',
+                'Chứng chỉ',
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
@@ -219,7 +219,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                     ? () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Maximum of 2 certificates allowed'),
+                            content: Text('Tối đa 2 chứng chỉ được cho phép'),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -232,7 +232,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                       : const Color(0xFF8B5CF6),
                 ),
                 label: Text(
-                  'Add Certificate',
+                  'Thêm dịch vụ',
                   style: TextStyle(
                     color: service.certificate.length >= 2
                         ? Colors.grey
@@ -248,7 +248,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 20.h),
                 child: Text(
-                  'No certificates available',
+                  'Không dịch vụ nào khả dụng',
                   style: TextStyle(
                     fontSize: 14.sp,
                     color: Colors.grey,
@@ -271,20 +271,20 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Certificate'),
+        title: const Text('Xoá chứng chỉ'),
         content:
-            const Text('Are you sure you want to delete this certificate?'),
+            const Text('Bạn chắc chắn muốn xoá chứng chỉ này không'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Huỷ'),
           ),
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: const Text('Xoá'),
           ),
         ],
       ),
@@ -305,14 +305,14 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Certificate deleted successfully'),
+            content: Text('Chứng chỉ xoá thành công'),
             backgroundColor: Colors.green,
           ),
         );
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Failed to delete certificate'),
+            content: Text('Xoá chứng chỉ thất bại'),
             backgroundColor: Colors.red,
           ),
         );
@@ -352,7 +352,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Add Certificate (${_service.certificate.length}/2)',
+                            'Thêm chứng chỉ (${_service.certificate.length}/2)',
                             style: TextStyle(
                               fontSize: 20.sp,
                               fontWeight: FontWeight.bold,
@@ -405,7 +405,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                                 Gap(8.h),
                                 Text(
                                   certificateFile == null
-                                      ? 'Upload Certificate File'
+                                      ? 'Tải chứng chỉ'
                                       : certificateFile!.path.split('/').last,
                                   style: TextStyle(
                                     fontSize: 14.sp,
@@ -417,7 +417,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                                 if (certificateFile == null) ...[
                                   Gap(4.h),
                                   Text(
-                                    'Supported formats: PDF, DOC, DOCX',
+                                    'Các định dạng khả dụng: PDF, DOC, DOCX',
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       color: Colors.grey,
@@ -432,8 +432,8 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                       Gap(16.h),
                       TextFormField(
                         decoration: InputDecoration(
-                          labelText: 'Certificate Name',
-                          hintText: 'Enter certificate name',
+                          labelText: 'Tên chứng chỉ',
+                          hintText: 'Nhập tên chứng chỉ',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.r),
                           ),
@@ -446,15 +446,15 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                               const TextStyle(color: Color(0xFF8B5CF6)),
                         ),
                         validator: (value) => value?.isEmpty == true
-                            ? 'Please enter a name'
+                            ? 'Vui lòng nhập tên chứng chỉ'
                             : null,
                         onSaved: (value) => name = value ?? '',
                       ),
                       Gap(16.h),
                       TextFormField(
                         decoration: InputDecoration(
-                          labelText: 'Description',
-                          hintText: 'Enter description',
+                          labelText: 'Mô tả',
+                          hintText: 'Nhập mô tả',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.r),
                           ),
@@ -483,7 +483,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                                           .showSnackBar(
                                         const SnackBar(
                                           content: Text(
-                                              'Please select a certificate file'),
+                                              'Vui lòng chọn 1 chứng chỉ'),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
@@ -515,7 +515,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                                           .showSnackBar(
                                         const SnackBar(
                                           content: Text(
-                                              'Certificate added successfully'),
+                                              'Chứng chỉ thêm thành công'),
                                           backgroundColor: Colors.green,
                                         ),
                                       );
@@ -526,7 +526,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                                           .showSnackBar(
                                         const SnackBar(
                                           content:
-                                              Text('Failed to add certificate'),
+                                              Text('Chứng chỉ thêm thất bại'),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
@@ -551,7 +551,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                                   ),
                                 )
                               : const Text(
-                                  'Add Certificate',
+                                  'Thêm chứng chỉ',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
@@ -645,7 +645,7 @@ class _CertificateCard extends StatelessWidget {
                           }
                         },
                         icon: Icon(Icons.file_download, size: 18.sp),
-                        label: const Text('View Certificate'),
+                        label: const Text('Xem chứng chỉ'),
                         style: TextButton.styleFrom(
                           foregroundColor: const Color(0xFF8B5CF6),
                           padding: EdgeInsets.zero,

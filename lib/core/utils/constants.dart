@@ -9,6 +9,7 @@ class AppConstants {
   static const String deniedBooking = '$baseUrl/api/Staff/DeniedBooking';
   static const String getStoreServiceForStaffbyStoreId =
       '$baseUrl/api/Service/GetAllServiceByStoreId';
+  static const String forgotPasswordUrl='$baseUrl/api/Account/ForgotPassword';
   static const String createStoreService =
       '$baseUrl/api/Staff/CreateStoreService';
   static const String updateStoreService =
@@ -47,6 +48,17 @@ class AppConstants {
   static const String createStore = '$baseUrl/api/StoreManager/CreateStore';
   static const String getStoreManagerInfo = '$baseUrl/api/StoreManager/GetInfo';
   static const String updateStoreManagerProfile = '$baseUrl/api/StoreManager/UpdateProfile';
+
+    //Wallet
+  static const String viewWallet = '$baseUrl/api/Wallet/ViewWallet';
+  static const String viewBalance = '$baseUrl/api/Wallet/ViewBalance';
+  static const String createDepositLink='$baseUrl/api/Payment/CreateDepositLink';
+  static const String cancelPayment='$baseUrl/api/Payment/CancelPayment';
+  static const String checkDepositResult='$baseUrl/api/Payment/CheckDepositResult';
+  static const String getAllTrancsaction='$baseUrl/api/Transaction/GetTransactions';
+  static const String getAllBillingRecord='$baseUrl/api/PetOwner/GetAllBillingRecord';
+  static const String updateBankInfo = '$baseUrl/api/Wallet/UpdateBankInfomation';
+  static const String withdrawMoney = '$baseUrl/api/Wallet/WithdrawMoney';
 
 
 

@@ -58,7 +58,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
+        0, // Scroll to 0 khi reverse: true
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
@@ -236,13 +236,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return ListView.builder(
       controller: _scrollController,
       padding: EdgeInsets.all(16.w),
-      reverse: false, // Messages are displayed from top to bottom
+      reverse: true, // Set to true để tin nhắn mới nhất ở dưới
       itemCount: messages.length,
       itemBuilder: (context, index) {
-        final message = messages[index];
-        final bool showDate = index == 0 ||
-            !_isSameDay(
-                messages[index].createTime, messages[index - 1].createTime);
+        final reversedIndex = messages.length - 1 - index;
+        final message = messages[reversedIndex];
+        final bool showDate = reversedIndex == 0 ||
+            !_isSameDay(messages[reversedIndex].createTime,
+                messages[reversedIndex - 1].createTime);
 
         return Column(
           children: [
@@ -251,8 +252,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               message: message,
               targetId: widget.poAccountId,
               conversationId: widget.conversationId,
-              scrollController: _scrollController, // Pass the scroll controller
-              isSending: _isSending && index == messages.length - 1,
+              scrollController: _scrollController,
+              isSending: _isSending && reversedIndex == 0,
+              storeAvatar: widget.storeAvatar,
+              storeName: widget.storeName,
             ),
           ],
         );
@@ -557,6 +560,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         return '';
     }
   }
+
   void _handleNewMessage(String content, int conversationId, int targetId,
       List<String> attachments) async {
     final newMessage = Message(
@@ -586,7 +590,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         .updateMessage(newMessage);
     _scrollToBottom();
   }
-
 }
 
 class MessageBubble extends ConsumerStatefulWidget {
@@ -595,6 +598,8 @@ class MessageBubble extends ConsumerStatefulWidget {
   final int targetId;
   final int conversationId;
   final ScrollController scrollController;
+  final String? storeAvatar;
+  final String storeName;
 
   const MessageBubble({
     Key? key,
@@ -603,6 +608,8 @@ class MessageBubble extends ConsumerStatefulWidget {
     this.isSending = false,
     required this.scrollController,
     required this.conversationId,
+    this.storeAvatar,
+    required this.storeName,
   }) : super(key: key);
 
   @override
@@ -637,16 +644,33 @@ class _MessageBubbleState extends ConsumerState<MessageBubble> {
                       shape: BoxShape.circle,
                       color: AppColor.violetColor.withOpacity(0.1),
                     ),
-                    child: Center(
-                      child: Text(
-                        'U',
-                        style: TextStyle(
-                          color: AppColor.violetColor,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: widget.storeAvatar != null &&
+                            widget.storeAvatar!.isNotEmpty
+                        ? Image.network(
+                            widget.storeAvatar!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Center(
+                              child: Text(
+                                widget.storeName[0],
+                                style: TextStyle(
+                                  color: AppColor.violetColor,
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Center(
+                            child: Text(
+                              widget.storeName[0],
+                              style: TextStyle(
+                                color: AppColor.violetColor,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
                   ),
                   Gap(8.w),
                 ],

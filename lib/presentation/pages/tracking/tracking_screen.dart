@@ -261,13 +261,13 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Tracking Order #${widget.bookingId}',
+              'Tracking Booking #${widget.bookingId}',
               style: AppTextStyle(context).title.copyWith(
                     fontSize: 18.sp,
                   ),
             ),
             Text(
-              'View order progress',
+              'Theo dõi trạng thái',
               style: AppTextStyle(context).bodyTextSmall.copyWith(
                     color: Colors.grey,
                     fontSize: 12.sp,
@@ -335,7 +335,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
                         ),
                       ),
                       error: (error, stack) => Center(
-                        child: Text('Error: $error'),
+                        child: Text('Hiện tại chưa có tracking nào'),
                       ),
                       data: (trackingList) => RefreshIndicator(
                         onRefresh: () async {
@@ -343,19 +343,73 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
                               .read(trackingControllerProvider.notifier)
                               .getTrackingInfo(widget.bookingId);
                         },
-                        child: ListView.builder(
-                          padding: EdgeInsets.only(
-                            top: 16.h,
-                            bottom: _selectedImages.isEmpty ? 80.h : 160.h,
-                          ),
-                          itemCount: trackingList.length,
-                          itemBuilder: (context, index) {
-                            return TrackingMessageCard(
-                              tracking: trackingList[index],
-                              isLastItem: index == trackingList.length - 1,
-                            );
-                          },
-                        ),
+                        child: trackingList.isEmpty
+                            ? ListView(
+                                children: [
+                                  Container(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.7,
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 20.w),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          width: 120.w,
+                                          height: 120.w,
+                                          decoration: BoxDecoration(
+                                            color: AppColor.violetColor
+                                                .withOpacity(0.1),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.timeline_outlined,
+                                            size: 60.sp,
+                                            color: AppColor.violetColor,
+                                          ),
+                                        ),
+                                        SizedBox(height: 24.h),
+                                        Text(
+                                          'No Tracking Updates',
+                                          style: AppTextStyle(context)
+                                              .title
+                                              .copyWith(
+                                                fontSize: 20.sp,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                        SizedBox(height: 12.h),
+                                        Text(
+                                          'No tracking information available for this order yet. Updates will appear here when they are added.',
+                                          textAlign: TextAlign.center,
+                                          style: AppTextStyle(context)
+                                              .bodyText
+                                              .copyWith(
+                                                color: Colors.grey,
+                                                height: 1.5,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : ListView.builder(
+                                padding: EdgeInsets.only(
+                                  top: 16.h,
+                                  bottom:
+                                      _selectedImages.isEmpty ? 80.h : 160.h,
+                                ),
+                                itemCount: trackingList.length,
+                                itemBuilder: (context, index) {
+                                  return TrackingMessageCard(
+                                    tracking: trackingList[index],
+                                    isLastItem:
+                                        index == trackingList.length - 1,
+                                  );
+                                },
+                              ),
                       ),
                     );
                   },

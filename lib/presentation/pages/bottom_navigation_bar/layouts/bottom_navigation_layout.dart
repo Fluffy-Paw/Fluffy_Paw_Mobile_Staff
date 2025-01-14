@@ -109,6 +109,35 @@ class _BottomNavigationLayoutState extends ConsumerState<BottomNavigationLayout>
         BottomItem(
           icon: Assets.svg.dashboard,
           activeIcon: Assets.svg.activeDashboard,
+          name: 'Thống kê',
+        ),
+        BottomItem(
+          icon: Assets.svg.bag,
+          activeIcon: Assets.svg.activeBag,
+          name: 'Doanh thu',
+        ),
+        BottomItem(
+          icon: Assets.svg.rider,
+          activeIcon: Assets.svg.activeRider,
+          name: 'Dịch vụ',
+        ),
+        BottomItem(
+          icon: Assets.svg.communicationsNotactive,
+          activeIcon: Assets.svg.communicationsActive,
+          name: 'Cửa hàng',
+        ),
+        BottomItem(
+          icon: Assets.svg.profile,
+          activeIcon: Assets.svg.activeProfile,
+          name: S.of(context).profile,
+        ),
+      ];
+    }
+    // Staff navigation items
+    return [
+      BottomItem(
+          icon: Assets.svg.dashboard,
+          activeIcon: Assets.svg.activeDashboard,
           name: S.of(context).dashboard,
         ),
         BottomItem(
@@ -131,30 +160,6 @@ class _BottomNavigationLayoutState extends ConsumerState<BottomNavigationLayout>
           activeIcon: Assets.svg.activeProfile,
           name: S.of(context).profile,
         ),
-      ];
-    }
-    // Staff navigation items
-    return [
-      BottomItem(
-        icon: Assets.svg.dashboard,
-        activeIcon: Assets.svg.activeDashboard,
-        name: S.of(context).dashboard,
-      ),
-      BottomItem(
-        icon: Assets.svg.bag,
-        activeIcon: Assets.svg.activeBag,
-        name: S.of(context).orders,
-      ),
-      BottomItem(
-        icon: Assets.svg.communicationsNotactive,
-        activeIcon: Assets.svg.communicationsActive,
-        name: S.of(context).inbox,
-      ),
-      BottomItem(
-        icon: Assets.svg.profile,
-        activeIcon: Assets.svg.activeProfile,
-        name: S.of(context).profile,
-      ),
     ];
   }
 }

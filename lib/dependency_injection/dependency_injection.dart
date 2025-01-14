@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:latlong2/latlong.dart';
 
 //select image state
 final selectedUserProfileImage = StateProvider<XFile?>((ref) => null);
@@ -116,9 +117,16 @@ final notificationCountProvider = Provider.family<int, NotificationType?>((ref, 
 final storeFormKey = Provider((ref) => GlobalKey<FormState>());
 final isCheckBox = StateProvider<bool>((ref) => false);
 final activeTabIndex = StateProvider<int>((ref) => 0);
+// Address detail providers
+final streetProvider = StateProvider<TextEditingController>((ref) => TextEditingController());
+final wardProvider = StateProvider<TextEditingController>((ref) => TextEditingController());
+final districtProvider = StateProvider<TextEditingController>((ref) => TextEditingController());
+final cityProvider = StateProvider<TextEditingController>((ref) => TextEditingController());
+final addressDescriptionProvider = StateProvider<TextEditingController>((ref) => TextEditingController());
 //final isPhoneVerified = StateProvider<bool>((ref) => false);
 //final obscureText1 = StateProvider<bool>((ref) => true);
 final obscureText2 = StateProvider<bool>((ref) => true);
+final selectedLocationProvider = StateProvider<LatLng?>((ref) => null);
 
 final businessLicenseProvider = StateProvider<XFile?>((ref) => null);
 final frontIdProvider = StateProvider<XFile?>((ref) => null);

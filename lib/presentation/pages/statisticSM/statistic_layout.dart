@@ -128,7 +128,7 @@ class _DashboardLayoutState extends ConsumerState<DashboardSMLayout> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      'Dashboard Statistics',
+                      'Thống kê doanh thu',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 28.sp,
@@ -137,7 +137,7 @@ class _DashboardLayoutState extends ConsumerState<DashboardSMLayout> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Welcome back! Heres your business overview',
+                      'Chào mừng trở lại! Đây là doanh thu của bạn',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.9),
                         fontSize: 14.sp,
@@ -158,25 +158,25 @@ class _DashboardLayoutState extends ConsumerState<DashboardSMLayout> {
 
   final stats = [
     {
-      'title': 'Total Orders',
+      'title': 'Tổng số đơn hàng',
       'value': statistics.numOfAll,
       'icon': Icons.shopping_bag_outlined,
       'color': AppColor.violetColor,
     },
     {
-      'title': 'Pending',
+      'title': 'Chờ xử lý',
       'value': statistics.numOfPending,
       'icon': Icons.pending_outlined,
       'color': Colors.orange,
     },
     {
-      'title': 'Accepted',
+      'title': 'Đã đồng ý',
       'value': statistics.numOfAccepted,
       'icon': Icons.check_circle_outline,
       'color': Colors.green,
     },
     {
-      'title': 'Canceled',
+      'title': 'Đã huỷ',
       'value': statistics.numOfCanceled,
       'icon': Icons.cancel_outlined,
       'color': Colors.red,
@@ -300,7 +300,7 @@ class _DashboardLayoutState extends ConsumerState<DashboardSMLayout> {
    child: Column(
      crossAxisAlignment: CrossAxisAlignment.start,
      children: [
-       Text('Revenue Overview', 
+       Text('Thống kê doanh thu', 
          style: TextStyle(
            fontSize: 20.sp,
            fontWeight: FontWeight.bold,
@@ -390,7 +390,7 @@ class _DashboardLayoutState extends ConsumerState<DashboardSMLayout> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Top Services',
+            'Các dịch vụ được ưa chuộng',
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,
@@ -444,7 +444,7 @@ class _DashboardLayoutState extends ConsumerState<DashboardSMLayout> {
                             borderRadius: BorderRadius.circular(20.r),
                           ),
                           child: Text(
-                            '${service.numberOfBooking} bookings',
+                            '${service.numberOfBooking} số đặt chỗ',
                             style: TextStyle(
                               color: AppColor.violetColor,
                               fontWeight: FontWeight.w500,

@@ -8,6 +8,7 @@ class SummeryCard extends StatelessWidget {
   final String count;
   final String status;
   final String icon;
+
   const SummeryCard({
     Key? key,
     required this.count,
@@ -18,7 +19,7 @@ class SummeryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14.r),
         color: AppColor.offWhiteColor,
@@ -31,13 +32,20 @@ class SummeryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                count.toString(),
-                style: AppTextStyle(context)
-                    .title
-                    .copyWith(color: AppColor.blackColor),
+              Flexible(
+                child: Text(
+                  count.toString(),
+                  style: AppTextStyle(context)
+                      .title
+                      .copyWith(color: AppColor.blackColor),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              SvgPicture.asset(icon)
+              SvgPicture.asset(
+                icon,
+                width: 24.w,
+                height: 24.h,
+              )
             ],
           ),
           const Spacer(),
@@ -47,6 +55,8 @@ class SummeryCard extends StatelessWidget {
               fontWeight: FontWeight.w400,
               color: AppColor.blackColor.withOpacity(0.4),
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           )
         ],
       ),

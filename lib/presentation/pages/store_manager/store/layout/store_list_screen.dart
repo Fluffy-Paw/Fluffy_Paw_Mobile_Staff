@@ -43,7 +43,7 @@ class _StoreListScreenState extends ConsumerState<StoreListScreen> {
         },
         backgroundColor: const Color(0xFF8B5CF6),
         icon: const Icon(Icons.add),
-        label: const Text('Add Store'),
+        label: const Text('Thêm cửa hàng'),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -57,7 +57,7 @@ class _StoreListScreenState extends ConsumerState<StoreListScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Store Management',
+            'Quản lý cửa hàng',
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,
@@ -65,7 +65,7 @@ class _StoreListScreenState extends ConsumerState<StoreListScreen> {
             ),
           ),
           Text(
-            'Browse all stores',
+            'Xem tất cả cửa hàng',
             style: TextStyle(
               fontSize: 12.sp,
               color: Colors.grey,

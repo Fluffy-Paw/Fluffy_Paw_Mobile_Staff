@@ -53,7 +53,7 @@ class _ServiceManagementScreenState extends ConsumerState<ServiceManagementScree
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Service Management',
+            'Quản lý dịch vụ',
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,
@@ -61,7 +61,7 @@ class _ServiceManagementScreenState extends ConsumerState<ServiceManagementScree
             ),
           ),
           Text(
-            'Manage your brand services',
+            'Quản lý dịch vụ của thương hiệu',
             style: TextStyle(
               fontSize: 12.sp,
               color: Colors.grey,
@@ -108,7 +108,7 @@ class _ServiceManagementScreenState extends ConsumerState<ServiceManagementScree
       onPressed: _handleAdd,
       backgroundColor: const Color(0xFF8B5CF6),
       icon: const Icon(Icons.add),
-      label: const Text('Add Service'),
+      label: const Text('Thêm dịch vụ'),
     );
   }
 
@@ -129,19 +129,19 @@ class _ServiceManagementScreenState extends ConsumerState<ServiceManagementScree
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Service'),
-        content: const Text('Are you sure you want to delete this service?'),
+        title: const Text('Xoá dịch vụ'),
+        content: const Text('Bạn có chắc chắn muốn xoá dịch vụ này?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Huỷ'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text('Delete'),
+            child: const Text('Xoá'),
           ),
         ],
       ),
@@ -282,7 +282,7 @@ class _ServiceCard extends StatelessWidget {
                       Gap(12.w),
                       _buildInfoChip(
                         Icons.book,
-                        '${service.bookingCount} bookings',
+                        '${service.bookingCount} đặt chỗ',
                       ),
                     ],
                   ),
@@ -297,7 +297,7 @@ class _ServiceCard extends StatelessWidget {
                         ),
                         Gap(4.w),
                         Text(
-                          '${service.certificate.length} Certificates',
+                          '${service.certificate.length} Chứng chỉ',
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: Colors.green,

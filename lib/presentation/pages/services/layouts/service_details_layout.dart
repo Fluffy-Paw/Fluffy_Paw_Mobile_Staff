@@ -54,7 +54,7 @@ class _ServiceDetailsLayoutState extends ConsumerState<ServiceDetailsLayout> {
     return Scaffold(
       backgroundColor: isDark ? AppColor.blackColor : AppColor.offWhiteColor,
       appBar: AppBar(
-        title: Text(currentService?.serviceId.toString() ?? ''),
+        title: Text(widget.service.name),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 20.w),
@@ -202,7 +202,7 @@ class _ServiceDetailsLayoutState extends ConsumerState<ServiceDetailsLayout> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    rider.id.toString(),
+                    widget.service.name,
                     style: AppTextStyle(context).title,
                   ),
                   Gap(5.h),
@@ -216,7 +216,7 @@ class _ServiceDetailsLayoutState extends ConsumerState<ServiceDetailsLayout> {
                   ),
                   Gap(5.h),
                   Text(
-                    'Joined at: ${rider.status}',
+                    'Trạng thái ${rider.status}',
                     style: AppTextStyle(context)
                         .bodyText
                         .copyWith(fontSize: 14, fontWeight: FontWeight.w400),
@@ -226,27 +226,30 @@ class _ServiceDetailsLayoutState extends ConsumerState<ServiceDetailsLayout> {
             ],
           ),
           Gap(20.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildCard(
-                type: 'job',
-                text: S.of(context).completeJobIn,
-                icon: Assets.svg.done,
-                count: GlobalFunction.numberLocalization(widget.service.cost),
-                color: AppColor.lime500,
-                context: context,
-              ),
-              _buildCard(
-                type: 'cash',
-                text: S.of(context).cashCollectedIn,
-                icon: Assets.svg.doller,
-                count:
-                    GlobalFunction.numberLocalization(widget.service.duration),
-                color: AppColor.violetColor,
-                context: context,
-              ),
-            ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildCard(
+                  type: 'job',
+                  text: S.of(context).completeJobIn,
+                  icon: Assets.svg.done,
+                  count: GlobalFunction.numberLocalization(widget.service.cost),
+                  color: AppColor.lime500,
+                  context: context,
+                ),
+                Gap(10.w),
+                _buildCard(
+                  type: 'cash',
+                  text: S.of(context).cashCollectedIn,
+                  icon: Assets.svg.doller,
+                  count: GlobalFunction.numberLocalization(
+                      widget.service.duration),
+                  color: AppColor.violetColor,
+                  context: context,
+                ),
+              ],
+            ),
           )
         ],
       ),

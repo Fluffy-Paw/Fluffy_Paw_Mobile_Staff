@@ -151,7 +151,7 @@ class _OrderLayoutState extends ConsumerState<OrderLayout> {
               subtitle: Padding(
                 padding: EdgeInsets.only(top: 3.h),
                 child: Text(
-                  'Today-${DateFormat('dd MMM,yyyy').format(DateTime.now().toLocal())}',
+                  'Hôm nay-${DateFormat('dd MMM,yyyy').format(DateTime.now().toLocal())}',
                   style: AppTextStyle(context)
                       .bodyTextSmall
                       .copyWith(fontWeight: FontWeight.w500, fontSize: 13.sp),
@@ -163,13 +163,13 @@ class _OrderLayoutState extends ConsumerState<OrderLayout> {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    _buildHeaderButton(
-                      onTap: _showQRScanner,
-                      icon: Icons.qr_code_scanner,
-                      backgroundColor: AppColor.violetColor.withOpacity(0.1),
-                      iconColor: AppColor.violetColor,
-                    ),
-                    SizedBox(width: 8.w),
+                    // _buildHeaderButton(
+                    //   onTap: _showQRScanner,
+                    //   icon: Icons.qr_code_scanner,
+                    //   backgroundColor: AppColor.violetColor.withOpacity(0.1),
+                    //   iconColor: AppColor.violetColor,
+                    // ),
+                    // SizedBox(width: 8.w),
                     _buildHeaderButton(
                       onTap: () => _showSearchLayout(context),
                       icon: Icons.search,
@@ -220,7 +220,6 @@ class _OrderLayoutState extends ConsumerState<OrderLayout> {
                       },
                       child: OrderTabCard(
                         isActiveTab: ref.watch(activeOrderTab) == index,
-                        orderCount: currentCount,
                         orderStatus:
                             GlobalFunction.getOrderStatusLocalizationText(
                           context: context,

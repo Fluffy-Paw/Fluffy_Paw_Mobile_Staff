@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:fluffypawsm/core/auth/hive_service.dart';
+import 'package:fluffypawsm/data/controller/order_controller.dart';
 import 'package:fluffypawsm/data/models/notification/noti.dart';
 import 'package:fluffypawsm/data/models/notification/notification_event.dart';
 import 'package:fluffypawsm/data/models/notification/notification_model.dart';
@@ -40,6 +41,12 @@ class NotificationController extends StateNotifier<NotificationState> {
         String notificationType = arguments[2]?.toString() ?? '';
         int bookingId = int.tryParse(arguments[3]?.toString() ?? '0') ?? 0;
 
+        // Check if notification is about new booking
+        if (message.toLowerCase().contains('đặt lịch mới cho dịch vụ')) {
+          // Reload new orders in dashboard
+          ref.read(orderController.notifier).getOrderListWithFilter('Pending');
+        }
+
         NotificationEvent event = NotificationEvent(
           message: message,
           type: _determineNotificationType(notificationType),
@@ -65,52 +72,59 @@ class NotificationController extends StateNotifier<NotificationState> {
     }
   }
   Future<void> fetchNotifications() async {
-    try {
-      state = state.copyWith(isLoading: true);
-      final token = await ref.read(hiveStoreService).getAuthToken();
+  // Thêm kiểm tra mounted
+  if (!mounted) return;
 
-      if (token == null) {
-        state = state.copyWith(
-          isLoading: false,
-          error: 'Authentication token not found',
-        );
-        return;
-      }
+  try {
+    state = state.copyWith(isLoading: true);
+    final token = await ref.read(hiveStoreService).getAuthToken();
 
-      final response = await http.get(
-        Uri.parse(
-            'https://fluffypaw.azurewebsites.net/api/Notification/GetNotification?numberNoti=1000'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        final Map<String, dynamic> data = responseData['data'];
-        final List<dynamic> items = data['items'];
-        final notifications = items
-            .map((json) => NotificationMapper.fromApiResponse(json))
-            .toList();
-        state = state.copyWith(
-          notifications: notifications,
-          isLoading: false,
-          error: null,
-        );
-      } else {
-        state = state.copyWith(
-          isLoading: false,
-          error: 'Failed to fetch notifications: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
+    if (token == null) {
+      if (!mounted) return;  // Kiểm tra lại sau async
       state = state.copyWith(
         isLoading: false,
-        error: 'Error fetching notifications: $e',
+        error: 'Authentication token not found',
+      );
+      return;
+    }
+
+    final response = await http.get(
+      Uri.parse(
+          'https://fluffypaw.azurewebsites.net/api/Notification/GetNotification?numberNoti=1000'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (!mounted) return; 
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      final Map<String, dynamic> data = responseData['data'];
+      final List<dynamic> items = data['items'];
+      final notifications = items
+          .map((json) => NotificationMapper.fromApiResponse(json))
+          .toList();
+      state = state.copyWith(
+        notifications: notifications,
+        isLoading: false,
+        error: null,
+      );
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to fetch notifications: ${response.statusCode}',
       );
     }
+  } catch (e) {
+    if (!mounted) return;  
+    state = state.copyWith(
+      isLoading: false,
+      error: 'Error fetching notifications: $e',
+    );
   }
+}
 
   Future<void> initializeSignalR() async {
     try {
@@ -199,42 +213,43 @@ class NotificationController extends StateNotifier<NotificationState> {
       state = state.copyWith(connectionStatus: 'Connected');
     });
 
-    _hubConnection?.on('ReceiveNoti', (arguments) {
-      if (arguments != null && arguments.isNotEmpty) {
-        try {
-          print('SignalR: Received notification: $arguments');
-          String userId = arguments[0].toString();
-          String message = arguments[1].toString();
-          //int bookingId = int.tryParse(arguments[3]?.toString() ?? '0') ?? 0;
+    // _hubConnection?.on('ReceiveNoti', (arguments) {
+    //   if (arguments != null && arguments.isNotEmpty) {
+    //     try {
+    //       print('SignalR: Received notification: $arguments');
+    //       String userId = arguments[0].toString();
+    //       String message = arguments[1].toString();
+    //       //int bookingId = int.tryParse(arguments[3]?.toString() ?? '0') ?? 0;
 
-          String notificationType = arguments[2]?.toString() ?? '';
-          int bookingId = int.tryParse(arguments[3]?.toString() ?? '0') ?? 0;
+    //       String notificationType = arguments[2]?.toString() ?? '';
+    //       int bookingId = int.tryParse(arguments[3]?.toString() ?? '0') ?? 0;
 
-          NotificationEvent event = NotificationEvent(
-              message: message,
-              type: _determineNotificationType(notificationType),
-              bookingId: bookingId);
-          eventBus.fire(event);
+    //       NotificationEvent event = NotificationEvent(
+    //           message: message,
+    //           type: _determineNotificationType(notificationType),
+    //           bookingId: bookingId);
+    //       eventBus.fire(event);
 
-          final newNotification = PetNotification(
-            title: "New Notification",
-            description: message,
-            time: DateTime.now(),
-            type: _determineNotificationType(message),
-            isRead: false,
-          );
+    //       final newNotification = PetNotification(
+    //         title: "New Notification",
+    //         description: message,
+    //         time: DateTime.now(),
+    //         type: _determineNotificationType(message),
+    //         isRead: false,
+    //       );
 
-          showLocalNotification(newNotification);
+    //       showLocalNotification(newNotification);
 
-          state = state.copyWith(
-            notifications: [newNotification, ...state.notifications],
-          );
-          print('SignalR: Notification processed successfully');
-        } catch (e) {
-          print('SignalR: Error handling notification: $e');
-        }
-      }
-    });
+    //       state = state.copyWith(
+    //         notifications: [newNotification, ...state.notifications],
+    //       );
+    //       print('SignalR: Notification processed successfully');
+    //     } catch (e) {
+    //       print('SignalR: Error handling notification: $e');
+    //     }
+    //   }
+    // }
+    // );
   }
 
   NotificationType _determineNotificationType(String message) {

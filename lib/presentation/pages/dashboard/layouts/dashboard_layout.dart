@@ -35,9 +35,9 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
   void initState() {
     super.initState();
     // Fetch pending orders when component mounts
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   ref.read(orderController.notifier).getOrderListWithFilter('Pending');
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(orderController.notifier).getOrderListWithFilter('Pending');
+    });
   }
 
   @override
@@ -244,7 +244,7 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
                 child: Row(
                   children: [
                     Text(
-                      "New Order",
+                      "Đơn đặt mới",
                       style: AppTextStyle(context).title.copyWith(
                           fontSize: 18.sp, fontWeight: FontWeight.w700),
                     ),
@@ -284,49 +284,49 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
           ),
           Gap(10.h),
           // List section
-          // Expanded(
-          //   child: RefreshIndicator(
-          //     onRefresh: () async {
-          //       await ref
-          //           .read(orderController.notifier)
-          //           .getOrderListWithFilter('Pending');
-          //     },
-          //     child: pendingOrders.isEmpty
-          //         ? ListView(
-          //             children: [
-          //               SizedBox(
-          //                 height: MediaQuery.of(context).size.height / 3,
-          //                 child: Center(
-          //                   child: Text(
-          //                     "No new orders",
-          //                     style: AppTextStyle(context).bodyText,
-          //                   ),
-          //                 ),
-          //               ),
-          //             ],
-          //           )
-          //         : AnimationLimiter(
-          //             child: ListView.builder(
-          //               padding: EdgeInsets.only(top: 5.h),
-          //               physics: const AlwaysScrollableScrollPhysics(),
-          //               itemCount: pendingOrders.length,
-          //               itemBuilder: (context, index) {
-          //                 final order = pendingOrders[index];
-          //                 return AnimationConfiguration.staggeredList(
-          //                   position: index,
-          //                   duration: const Duration(milliseconds: 500),
-          //                   child: SlideAnimation(
-          //                     verticalOffset: 50.0.w,
-          //                     child: FadeInAnimation(
-          //                       child: PendingOrderCard(order: order),
-          //                     ),
-          //                   ),
-          //                 );
-          //               },
-          //             ),
-          //           ),
-          //   ),
-          // ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await ref
+                    .read(orderController.notifier)
+                    .getOrderListWithFilter('Pending');
+              },
+              child: pendingOrders.isEmpty
+                  ? ListView(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height / 3,
+                          child: Center(
+                            child: Text(
+                              "No new orders",
+                              style: AppTextStyle(context).bodyText,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : AnimationLimiter(
+                      child: ListView.builder(
+                        padding: EdgeInsets.only(top: 5.h),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: pendingOrders.length,
+                        itemBuilder: (context, index) {
+                          final order = pendingOrders[index];
+                          return AnimationConfiguration.staggeredList(
+                            position: index,
+                            duration: const Duration(milliseconds: 500),
+                            child: SlideAnimation(
+                              verticalOffset: 50.0.w,
+                              child: FadeInAnimation(
+                                child: PendingOrderCard(order: order),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+            ),
+          ),
         ],
       ),
     );

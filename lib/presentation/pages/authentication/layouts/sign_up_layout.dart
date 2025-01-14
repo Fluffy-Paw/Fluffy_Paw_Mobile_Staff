@@ -19,6 +19,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
 class SignUpLayout extends ConsumerStatefulWidget {
@@ -34,6 +35,45 @@ class _SignUpLayoutState extends ConsumerState<SignUpLayout>
   final List<FocusNode> shopFNode = List.generate(6, (index) => FocusNode());
   final TextEditingController pinCodeController = TextEditingController();
   late TabController tabController;
+  bool _hasLocationPermission = false;
+  Future<void> _checkLocationPermission() async {
+    // Check if location services are enabled
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      GlobalFunction.showCustomSnackbar(
+        message: 'Định vị đang bị chặn, vui lòng mở định vị',
+        isSuccess: false,
+      );
+      return;
+    }
+
+    // Check location permission status
+    LocationPermission permission = await Geolocator.checkPermission();
+    
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        GlobalFunction.showCustomSnackbar(
+          message: 'Location permissions are denied',
+          isSuccess: false,
+        );
+        return;
+      }
+    }
+    
+    if (permission == LocationPermission.deniedForever) {
+      GlobalFunction.showCustomSnackbar(
+        message: 'Location permissions are permanently denied, please enable them in settings',
+        isSuccess: false,
+      );
+      return;
+    }
+
+    // Permission granted
+    setState(() {
+      _hasLocationPermission = true;
+    });
+  }
 
   @override
   void initState() {
@@ -45,6 +85,7 @@ class _SignUpLayoutState extends ConsumerState<SignUpLayout>
     //   }
     // });
     GlobalFunction.clearControllers(ref: ref);
+    _checkLocationPermission();
   }
 
   // @override
@@ -72,7 +113,15 @@ class _SignUpLayoutState extends ConsumerState<SignUpLayout>
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: _buildAppBar(context),
-        bottomNavigationBar: _buildBottomBar(context),
+        persistentFooterButtons: [
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+            child: ref.watch(activeTabIndex) == 0
+                ? _buildFirstStepButton(context)
+                : _buildSubmitButton(context),
+          ),
+        ],
         body: TabBarView(
           physics: const NeverScrollableScrollPhysics(),
           controller: tabController,
@@ -137,7 +186,7 @@ class _SignUpLayoutState extends ConsumerState<SignUpLayout>
           tabController.animateTo(0);
           ref.read(activeTabIndex.notifier).state = 0;
           GlobalFunction.showCustomSnackbar(
-            message: 'Please verify your phone number first',
+            message: 'Vui lòng xác nhận số điện thoại trước',
             isSuccess: false,
           );
         }
@@ -230,7 +279,7 @@ class _SignUpLayoutState extends ConsumerState<SignUpLayout>
 
     if (ref.read(passwordProvider).text != ref.read(confirmPassProvider).text) {
       GlobalFunction.showCustomSnackbar(
-        message: 'Provided password is not matched!',
+        message: 'Mật khẩu không trùng khớp',
         isSuccess: false,
       );
       return;
@@ -303,9 +352,15 @@ class _SignUpLayoutState extends ConsumerState<SignUpLayout>
   }
 
   Future<void> _handleSubmit(BuildContext context) async {
+    if (!_hasLocationPermission) {
+      await _checkLocationPermission();
+      if (!_hasLocationPermission) {
+        return;
+      }
+    }
     if (!ref.read(isPhoneNumberVerified)) {
       GlobalFunction.showCustomSnackbar(
-        message: 'Please verify your phone number first',
+        message: 'Vui lòng xác nhận số điện thoại trước',
         isSuccess: false,
       );
       return;
@@ -314,7 +369,7 @@ class _SignUpLayoutState extends ConsumerState<SignUpLayout>
     final formState = ref.read(shopDetailsFormKey).currentState;
     if (formState == null || !formState.validate()) {
       GlobalFunction.showCustomSnackbar(
-        message: 'Please fill all required fields correctly',
+        message: 'Vui lòng điền đầy đủ các trường',
         isSuccess: false,
       );
       return;
@@ -323,7 +378,7 @@ class _SignUpLayoutState extends ConsumerState<SignUpLayout>
     // Check required files
     if (ref.read(selectedShopLogo) == null) {
       GlobalFunction.showCustomSnackbar(
-        message: 'Shop logo is required',
+        message: 'Brand logo không được bỏ trống',
         isSuccess: false,
       );
       return;
@@ -333,7 +388,7 @@ class _SignUpLayoutState extends ConsumerState<SignUpLayout>
         ref.read(frontIdProvider) == null ||
         ref.read(backIdProvider) == null) {
       GlobalFunction.showCustomSnackbar(
-        message: 'All required documents must be uploaded',
+        message: 'Các tài liệu cần được updload',
         isSuccess: false,
       );
       return;
@@ -366,7 +421,7 @@ class _SignUpLayoutState extends ConsumerState<SignUpLayout>
 
       if (success) {
         GlobalFunction.showCustomSnackbar(
-          message: 'Registration successful',
+          message: 'Đăng kí thành công',
           isSuccess: true,
         );
         context.nav.pushNamedAndRemoveUntil(

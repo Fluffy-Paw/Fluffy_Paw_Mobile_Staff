@@ -2,8 +2,10 @@ import 'package:fluffypawsm/core/gen/assets.gen.dart';
 import 'package:fluffypawsm/core/generated/l10n.dart';
 import 'package:fluffypawsm/core/utils/app_color.dart';
 import 'package:fluffypawsm/core/utils/app_text_style.dart';
+import 'package:fluffypawsm/core/utils/context_less_navigation.dart';
 import 'package:fluffypawsm/core/utils/theme.dart';
 import 'package:fluffypawsm/presentation/widgets/component/custom_button.dart';
+import 'package:fluffypawsm/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -49,8 +51,7 @@ class UnderReviewLayout extends StatelessWidget {
               CustomButton(
                   buttonText: 'Close',
                   onPressed: () {
-                    SystemChannels.platform
-                        .invokeListMethod('SystemNavigator.pop');
+                    () => context.nav.pushNamed(Routes.signUp);
                   })
             ],
           ),

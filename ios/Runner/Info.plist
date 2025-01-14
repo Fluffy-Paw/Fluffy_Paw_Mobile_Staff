@@ -10,6 +10,12 @@
    <string>App needs to access files for saving images</string>
    <key>NSPhotoLibraryUsageDescription</key>
    <string>Allow access to your photo library to upload tracking images and documents</string>
+   <key>NSLocationWhenInUseUsageDescription</key>
+   <string>Need location access to select your address</string>
+   <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+   <string>Need location access to select your address</string>
+   <key>NSLocationUsageDescription</key>
+   <string>Need location access to select your address</string>  
    
    <key>NSCameraUsageDescription</key>
    <string>Need camera access for QR scanning and taking tracking photos</string>

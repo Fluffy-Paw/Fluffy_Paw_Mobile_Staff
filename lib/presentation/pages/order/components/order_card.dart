@@ -139,7 +139,7 @@ class OrderCard extends StatelessWidget {
         ),
         Gap(8.w),
         Text(
-          '#${order.id}',
+          '#${order.code}',
           style: AppTextStyle(context).bodyText.copyWith(
             fontWeight: FontWeight.w500,
             color: AppColor.blackColor.withOpacity(0.8),

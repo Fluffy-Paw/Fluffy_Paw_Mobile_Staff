@@ -7,6 +7,7 @@ import 'package:fluffypawsm/presentation/pages/bottom_navigation_bar/bottom_navi
 import 'package:fluffypawsm/presentation/pages/bottom_navigation_bar/layouts/bottom_navigation_layout.dart';
 import 'package:fluffypawsm/presentation/pages/dashboard/dashboard_view.dart';
 import 'package:fluffypawsm/presentation/pages/dashboard/layouts/dashboard_layout.dart';
+import 'package:fluffypawsm/presentation/pages/forget_password/ForgetPasswordScreen.dart';
 import 'package:fluffypawsm/presentation/pages/notification/notification_view.dart';
 import 'package:fluffypawsm/presentation/pages/order/order_details_view.dart';
 import 'package:fluffypawsm/presentation/pages/profile/seller_account_view.dart';
@@ -14,9 +15,12 @@ import 'package:fluffypawsm/presentation/pages/services/create_store_service_vie
 import 'package:fluffypawsm/presentation/pages/services/service_detail_view.dart';
 import 'package:fluffypawsm/presentation/pages/services/service_list_view.dart';
 import 'package:fluffypawsm/presentation/pages/splash_screen/splash_view.dart';
+import 'package:fluffypawsm/presentation/pages/store_manager/booking/booking_dashboard_screen.dart';
 import 'package:fluffypawsm/presentation/pages/store_manager/profile/store_manager_profile_layout.dart';
 import 'package:fluffypawsm/presentation/pages/store_manager/profile/store_manager_profile_view.dart';
 import 'package:fluffypawsm/presentation/pages/store_manager/store/store_list_view.dart';
+import 'package:fluffypawsm/presentation/pages/store_manager/wallet/wallet_view.dart';
+import 'package:fluffypawsm/presentation/pages/store_manager/wallet/withdraw_view.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -37,6 +41,11 @@ class Routes{
   static const serviceListByBrand = '/serviceListByBrand';
   static const storeList = '/storeList';
   static const storeManagerProfile = '/storeManagerProfile';
+  static const String forgotPassword = '/forgot-password';
+  static const wallet = "/wallet";
+  static const topUp = "/topUp";
+  static const withdraw = "/withdraw";
+  static const earningHistory = '/earningHistory';
 }
 class StoreServiceRouteArgs {
   final int serviceId;
@@ -57,6 +66,15 @@ Route generatedRoutes(RouteSettings settings){
     case Routes.splash:
       child = const SplashView();
       break;
+    case Routes.wallet:
+      child = const WalletView();
+      break;
+    case Routes.withdraw:
+      child = const WithdrawView();
+      break;
+    case Routes.earningHistory:
+      child = const BookingDashboardScreen();
+      break;
     case Routes.notification:
       child = const NotificationView();
     case Routes.login:
@@ -65,6 +83,10 @@ Route generatedRoutes(RouteSettings settings){
     case Routes.signUp:
       child = const SignUpView();
       break;
+    case Routes.forgotPassword:
+      return MaterialPageRoute(
+        builder: (_) => const ForgetPasswordScreen(),
+      );
     case Routes.underReviewAccount:
       child = const UnderReviewView();
       break;

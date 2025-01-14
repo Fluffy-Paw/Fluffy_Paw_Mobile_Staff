@@ -7,13 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class OrderTabCard extends ConsumerWidget {
-  final int orderCount;
   final String orderStatus;
   final bool isActiveTab;
-  
+
   const OrderTabCard({
     Key? key,
-    required this.orderCount,
     required this.orderStatus,
     required this.isActiveTab,
   }) : super(key: key);
@@ -21,7 +19,6 @@ class OrderTabCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     bool isDark = Theme.of(context).scaffoldBackgroundColor == AppColor.blackColor;
-    final isLoading = ref.watch(isLoadingCountsProvider);
 
     return IntrinsicHeight(
       child: Container(
@@ -40,41 +37,13 @@ class OrderTabCard extends ConsumerWidget {
           ),
         ),
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isLoading)
-                SizedBox(
-                  width: 20.w,
-                  height: 20.h,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      isActiveTab ? AppColor.violetColor : AppColor.gray,
-                    ),
-                  ),
-                )
-              else
-                Text(
-                  GlobalFunction.numberLocalization(orderCount.toString()),
-                  style: AppTextStyle(context).bodyText.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: isActiveTab 
-                            ? AppColor.violetColor
-                            : Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
+          child: Text(
+            orderStatus,
+            style: AppTextStyle(context).bodyTextSmall.copyWith(
+                  color: isActiveTab
+                      ? AppColor.violetColor
+                      : Theme.of(context).textTheme.bodySmall?.color,
                 ),
-              Text(
-                orderStatus,
-                style: AppTextStyle(context).bodyTextSmall.copyWith(
-                      color: isActiveTab 
-                          ? AppColor.violetColor 
-                          : Theme.of(context).textTheme.bodySmall?.color,
-                    ),
-              )
-            ],
           ),
         ),
       ),

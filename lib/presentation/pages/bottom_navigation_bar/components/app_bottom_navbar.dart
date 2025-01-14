@@ -15,13 +15,13 @@ class AppBottomNavbar extends ConsumerWidget {
     required this.bottomItem,
     required this.onSelect,
   });
+
   final List<BottomItem> bottomItem;
   final Function(int? index) onSelect;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 5.h),
-      height: 85.h,
       width: double.infinity,
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
@@ -31,86 +31,87 @@ class AppBottomNavbar extends ConsumerWidget {
               color: AppColor.offWhiteColor,
               spreadRadius: -2,
               blurRadius: 5,
+              offset: Offset(0, -1),
             ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(
-          bottomItem.length,
-              (index) {
-            return GestureDetector(
-              onTap: () {
-                onSelect(index);
-              },
-              child: _buildBottomItem(
+      child: SafeArea(
+        child: SizedBox(
+          height: 60.h,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(
+              bottomItem.length,
+              (index) => _buildNavItem(
                 bottomItem: bottomItem[index],
                 index: index,
                 context: context,
                 ref: ref,
               ),
-            );
-          },
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildBottomItem(
-      {required BottomItem bottomItem,
-        required int index,
-        required BuildContext context,
-        required WidgetRef ref}) {
+  Widget _buildNavItem({
+    required BottomItem bottomItem,
+    required int index,
+    required BuildContext context,
+    required WidgetRef ref,
+  }) {
     final int selectedIndex = ref.watch(selectedIndexProvider);
-    return SizedBox(
-      child: Column(
-        children: [
-          Stack(
-            alignment: AlignmentDirectional.center,
-            children: [
-              Center(
-                child: AnimatedContainer(
-                  alignment: Alignment.center,
-                  duration: const Duration(milliseconds: 200),
-                  height: index == selectedIndex ? 40.0 : 0.0,
-                  width: index == selectedIndex ? 40.0 : 0.0,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12.r),
-                    color: index == selectedIndex
-                        ? colors(context).primaryColor
-                        : Colors.transparent,
+    final bool isSelected = index == selectedIndex;
+
+    return GestureDetector(
+      onTap: () => onSelect(index),
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 60.w,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 36.h,
+              width: 36.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected
+                    ? (colors(context).primaryColor ?? Colors.blue).withOpacity(0.1)
+                    : Colors.transparent,
+              ),
+              child: Center(
+                child: SvgPicture.asset(
+                  isSelected ? bottomItem.activeIcon : bottomItem.icon,
+                  height: 24.h,
+                  width: 24.w,
+                  colorFilter: ColorFilter.mode(
+                    isSelected
+                        ? (colors(context).primaryColor ?? Colors.blue)
+                        : (colors(context).bodyTextSmallColor ?? Colors.grey),
+                    BlendMode.srcIn,
                   ),
                 ),
               ),
-              Container(
-                padding: EdgeInsets.zero,
-                height: 42.h,
-                width: 42.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Center(
-                  child: SvgPicture.asset(
-                    index == selectedIndex
-                        ? bottomItem.activeIcon
-                        : bottomItem.icon,
-                    height: 26.h,
-                    width: 26.w,
-                  ),
-                ),
-              )
-            ],
-          ),
-          Gap(3.h),
-          Text(
-            bottomItem.name,
-            style: AppTextStyle(context).bodyTextSmall.copyWith(
-                fontWeight: FontWeight.w500,
-                color: index == selectedIndex
-                    ? colors(context).primaryColor
-                    : colors(context).bodyTextSmallColor),
-          )
-        ],
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              bottomItem.name,
+              style: AppTextStyle(context).bodyTextSmall.copyWith(
+                fontSize: 10.sp,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected
+                    ? (colors(context).primaryColor ?? Colors.blue)
+                    : (colors(context).bodyTextSmallColor ?? Colors.grey),
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }

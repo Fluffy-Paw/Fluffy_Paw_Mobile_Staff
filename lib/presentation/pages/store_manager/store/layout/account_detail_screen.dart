@@ -236,7 +236,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       children: [
         _buildDivider(),
         Text(
-          'Profile Information',
+          "Thông tin cá nhân",
           style: AppTextStyle(context).title,
         ),
         Gap(16.h),
@@ -258,7 +258,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               
               _buildInfoField(
                 icon: Icons.person,
-                title: 'Username',
+                title: 'Tên đăng nhập',
                 controller: usernameController,
                 enabled: isEditing,
                 readOnly: true,
@@ -292,13 +292,13 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Password',
+              'Mật khẩu',
               style: AppTextStyle(context).title,
             ),
             if (!isEditing && !isUpdatingPassword)
               TextButton.icon(
                 icon: const Icon(Icons.lock_outline),
-                label: const Text('Change Password'),
+                label: const Text('Đổi mật khẩu'),
                 onPressed: () {
                   setState(() {
                     isUpdatingPassword = true;
@@ -326,7 +326,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               children: [
                 _buildInfoField(
                   icon: Icons.lock,
-                  title: 'New Password',
+                  title: 'Mật khẩu mới',
                   controller: passwordController,
                   enabled: true,
                   isPassword: true,
@@ -334,14 +334,14 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 _buildDivider(),
                 _buildInfoField(
                   icon: Icons.lock_outline,
-                  title: 'Confirm Password',
+                  title: 'Xác nhận mật khẩu',
                   controller: confirmPasswordController,
                   enabled: true,
                   isPassword: true,
                 ),
                 Gap(16.h),
                 CustomButton(
-                  buttonText: 'Update Password',
+                  buttonText: 'Đổi mật khẩu',
                   onPressed: _handleUpdatePassword,
                 ),
               ],
@@ -389,10 +389,10 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     obscureText: isPassword,
                     validator: (value) {
                       if (value?.isEmpty ?? true) {
-                        return 'This field is required';
+                        return 'Mục này không được bỏ trống';
                       }
                       if (isPassword && value!.length < 6) {
-                        return 'Password must be at least 6 characters';
+                        return 'Mật khẩu phải hơn 6 kí tự';
                       }
                       return null;
                     },

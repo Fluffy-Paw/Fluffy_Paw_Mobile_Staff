@@ -16,14 +16,16 @@ class CheckinConfirmationScreen extends ConsumerStatefulWidget {
   final String apiUrl;
   final Map<String, dynamic> requestData;
   final bool isCheckout;
+  final int serviceTypeId;
 
-  const CheckinConfirmationScreen({
-    Key? key,
-    required this.orderId,
-    required this.apiUrl,
-    required this.requestData,
-    this.isCheckout = false,
-  }) : super(key: key);
+  const CheckinConfirmationScreen(
+      {Key? key,
+      required this.orderId,
+      required this.apiUrl,
+      required this.requestData,
+      this.isCheckout = false,
+      required this.serviceTypeId})
+      : super(key: key);
 
   @override
   ConsumerState<CheckinConfirmationScreen> createState() =>
@@ -90,7 +92,7 @@ class _CheckinConfirmationScreenState
 
     // Image validation
     if (widget.isCheckout &&
-        (_selectedImage == null || _checkoutImage == null)) {
+        (_checkoutImage == null)) {
       GlobalFunction.showCustomSnackbar(
         message: 'Vui lòng chọn đầy đủ ảnh trước và sau khi trả',
         isSuccess: false,
@@ -326,11 +328,12 @@ class _CheckinConfirmationScreenState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (widget.isCheckout) ...[
-                _buildImageSection(
-                  title: 'Ảnh trước khi trả',
-                  image: _selectedImage,
-                  onPick: (source) => _pickImage(source),
-                ),
+                if (widget.serviceTypeId == 2)
+                  _buildImageSection(
+                    title: 'Ảnh trước khi trả',
+                    image: _selectedImage,
+                    onPick: (source) => _pickImage(source),
+                  ),
                 Gap(20.h),
                 _buildImageSection(
                   title: 'Ảnh sau khi trả',
@@ -338,7 +341,7 @@ class _CheckinConfirmationScreenState
                   onPick: (source) => _pickImage(source, isCheckoutImage: true),
                 ),
                 Gap(20.h),
-                _buildCheckoutForm(),
+                if (widget.serviceTypeId == 2) _buildCheckoutForm(),
               ] else
                 _buildImageSection(
                   title: 'Ảnh check-in',

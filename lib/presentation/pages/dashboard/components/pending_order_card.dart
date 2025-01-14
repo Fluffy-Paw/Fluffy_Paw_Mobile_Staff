@@ -78,16 +78,16 @@ class PendingOrderCard extends StatelessWidget {
             ),
           ),
           Gap(5.w),
-          Text(
-            GlobalFunction.getOrderStatusLocalizationText(
-                status: order.phone, context: context),
-            style: AppTextStyle(context).bodyTextSmall.copyWith(
-              fontWeight: FontWeight.w400,
-              color: AppColor.blackColor,
-              fontSize: 13.sp,
-            ),
-          ),
-          Gap(5.w),
+          // Text(
+          //   GlobalFunction.getOrderStatusLocalizationText(
+          //       status: order.s, context: context),
+          //   style: AppTextStyle(context).bodyTextSmall.copyWith(
+          //     fontWeight: FontWeight.w400,
+          //     color: AppColor.blackColor,
+          //     fontSize: 13.sp,
+          //   ),
+          // ),
+          // Gap(5.w),
           Container(
             height: 5,
             width: 5,

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:fluffypawsm/core/utils/app_color.dart';
 import 'package:fluffypawsm/dependency_injection/dependency_injection.dart';
 import 'package:flutter/material.dart';
@@ -47,11 +48,14 @@ class GlobalFunction {
     });
   }
 
-  static Future<void> pickImageFromGallery(
-      {required WidgetRef ref, required ImageType imageType}) async {
+  static Future<void> pickImageFromGallery({
+    required WidgetRef ref,
+    required ImageType imageType,
+    ImageSource? imageSource,  // Thêm parameter này
+  }) async {
     final ImagePicker picker = ImagePicker();
     final XFile? pickedImage = await picker.pickImage(
-      source: ImageSource.gallery,
+      source: imageSource ?? ImageSource.gallery,
     );
 
     if (pickedImage != null) {
@@ -76,6 +80,56 @@ class GlobalFunction {
           break;
       }
     }
+  }
+   static Future<void> pickFileFromSystem({
+    required WidgetRef ref,
+    required ImageType imageType,
+  }) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+        allowMultiple: false,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = XFile(result.files.first.path!);
+        
+        switch (imageType) {
+          case ImageType.shopLogo:
+            ref.read(selectedShopLogo.notifier).state = file;
+            break;
+          case ImageType.businessLicense:
+            ref.read(businessLicenseProvider.notifier).state = file;
+            break;
+          case ImageType.frontId:
+            ref.read(frontIdProvider.notifier).state = file;
+            break;
+          case ImageType.backId:
+            ref.read(backIdProvider.notifier).state = file;
+            break;
+          case ImageType.userProfile:
+            ref.read(selectedUserProfileImage.notifier).state = file;
+            break;
+          case ImageType.shopBanner:
+            ref.read(selectedShopBanner.notifier).state = file;
+            break;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking file: $e');
+      showCustomSnackbar(
+        message: 'Không thể chọn file. Vui lòng thử lại',
+        isSuccess: false,
+      );
+    }
+  }
+
+  // Thêm phương thức kiểm tra file type
+  static bool isValidFileType(String filePath) {
+    final validExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
+    final extension = filePath.toLowerCase().split('.').last;
+    return validExtensions.contains('.$extension');
   }
 
   static Future<bool> checkGalleryPermission() async {

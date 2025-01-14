@@ -166,6 +166,30 @@ class AuthenticationController extends StateNotifier<bool> {
       state = false;
     }
   }
+  Future<bool> forgotPassword({
+    required String phoneNumber,
+    required String newPassword,
+  }) async {
+    try {
+      state = true;
+      final response = await ref.read(authServiceProvider).forgotPassword(
+            phoneNumber: phoneNumber,
+            newPassword: newPassword,
+          );
+
+      if (response.statusCode != 200) {
+        state = false;
+        return false;
+      }
+      
+      state = false;
+      return true;
+    } catch (e) {
+      debugPrint(e.toString());
+      state = false;
+      throw Exception('Có lỗi xảy ra khi đổi mật khẩu: ${e.toString()}');
+    }
+  }
 }
 
 final authController = StateNotifierProvider<AuthenticationController, bool>(

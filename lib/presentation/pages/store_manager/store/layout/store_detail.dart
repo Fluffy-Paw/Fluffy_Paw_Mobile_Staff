@@ -154,25 +154,25 @@ class StoreDetailScreen extends StatelessWidget {
                   Gap(24.h),
                   _buildInfoSection(
                     context: context,
-                    title: 'Contact Information',
+                    title: 'Thông tin liên hệ',
                     children: [
                       _buildContactItem(
                         context: context,
                         icon: Icons.phone,
-                        title: 'Phone Number',
+                        title: 'Số điện thoại',
                         content: store.phone,
                       ),
                       _buildContactItem(
                         context: context,
                         icon: Icons.location_on,
-                        title: 'Address',
+                        title: 'Địa chỉ',
                         content: store.address,
                       ),
                     ],
                   ),
                   Gap(24.h),
                   Text(
-                    'Operating License',
+                    'Giấy phép hoạt động',
                     style: AppTextStyle(context).title.copyWith(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
@@ -211,7 +211,7 @@ class StoreDetailScreen extends StatelessWidget {
                                 ),
                                 Gap(8.h),
                                 Text(
-                                  'Image not available',
+                                  'Không có hình ảnh',
                                   style: AppTextStyle(context)
                                       .bodyTextSmall
                                       .copyWith(
@@ -267,7 +267,7 @@ class StoreDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Store Manager',
+                      'Nhân viên',
                       style: AppTextStyle(context).bodyTextSmall.copyWith(
                             color: AppColor.gray,
                           ),
@@ -364,7 +364,7 @@ class StoreDetailScreen extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  'Status',
+                  'Trạng thái',
                   style: AppTextStyle(context).bodyTextSmall.copyWith(
                         color: AppColor.gray,
                       ),
@@ -382,7 +382,7 @@ class StoreDetailScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: Text(
-                    store.status ? 'Active' : 'Inactive',
+                    store.status ? 'Hoạt động' : 'Ngừng hoạt động',
                     style: AppTextStyle(context).bodyTextSmall.copyWith(
                           color: store.status ? Colors.green : Colors.red,
                           fontWeight: FontWeight.w500,

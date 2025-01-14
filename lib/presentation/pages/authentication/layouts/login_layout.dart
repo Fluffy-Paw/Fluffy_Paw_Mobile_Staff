@@ -43,124 +43,153 @@ class _LoginLayoutState extends ConsumerState<LoginLayout> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        bottomNavigationBar: SizedBox(
-          height: 50.h,
-          child: Center(
-            child: RichText(
-              text: TextSpan(
+        resizeToAvoidBottomInset: true, // Thay đổi từ false sang true
+        body: SafeArea(
+          child: SingleChildScrollView(
+            // Wrap toàn bộ content trong SingleChildScrollView
+            physics: const ClampingScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: 20.w,
+                right: 20.w,
+                top: 40.h,
+                bottom: MediaQuery.of(context).viewInsets.bottom +
+                    20.h, // Thêm padding bottom để tránh bàn phím
+              ),
+              child: Column(
                 children: [
-                  TextSpan(
-                    text: S.of(context).dontHaveAnAccount,
-                    style: AppTextStyle(context).bodyText.copyWith(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 14.sp,
+                  FormBuilder(
+                    key: formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SvgPicture.asset(
+                          themeColor == AppColor.blackColor
+                              ? Assets.svg.fluffypawLogo
+                              : Assets.svg.fluffyPawDarl,
+                          width: 200.w,
                         ),
+                        Gap(30.h),
+                        Text(
+                          S.of(context).loginTitle,
+                          style: AppTextStyle(context).title,
+                        ),
+                        Gap(30.h),
+                        CustomTextFormField(
+                          name: 'emailOrPhone',
+                          focusNode: fNodes[0],
+                          hintText: S.of(context).emailOrPhone,
+                          textInputType: TextInputType.text,
+                          controller: contactController,
+                          textInputAction: TextInputAction.next,
+                          validator: (value) => GlobalFunction.shopDesValidator(
+                            value: value!,
+                            hintText: S.of(context).emailOrPhone,
+                            context: context,
+                          ),
+                        ),
+                        Gap(30.h),
+                        CustomTextFormField(
+                          name: 'password',
+                          focusNode: fNodes[1],
+                          hintText: S.of(context).password,
+                          textInputType: TextInputType.text,
+                          controller: passwordController,
+                          textInputAction: TextInputAction.done,
+                          obscureText: ref.watch(obscureText1),
+                          widget: IconButton(
+                            splashColor: Colors.transparent,
+                            onPressed: () {
+                              ref.read(obscureText1.notifier).state =
+                                  !ref.read(obscureText1.notifier).state;
+                            },
+                            icon: Icon(
+                              !ref.read(obscureText1.notifier).state
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                          ),
+                          validator: (value) =>
+                              GlobalFunction.passwordValidator(
+                            value: value!,
+                            hintText: S.of(context).password,
+                            context: context,
+                          ),
+                        ),
+                        Gap(20.h),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () =>
+                                context.nav.pushNamed(Routes.forgotPassword),
+                            child: Text(
+                              'Quên mật khẩu?',
+                              style: AppTextStyle(context).bodyText.copyWith(
+                                    color: colors(context).primaryColor,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                            ),
+                          ),
+                        ),
+                        Gap(30.h),
+                        ref.watch(authController)
+                            ? const Center(child: CircularProgressIndicator())
+                            : CustomButton(
+                                buttonText: S.of(context).login,
+                                onPressed: () {
+                                  FocusScope.of(context).unfocus();
+                                  if (formKey.currentState!.validate()) {
+                                    ref
+                                        .read(authController.notifier)
+                                        .login(
+                                          contact: contactController.text,
+                                          password: passwordController.text,
+                                        )
+                                        .then((isSuccess) async {
+                                      if (isSuccess) {
+                                        context.nav.pushNamedAndRemoveUntil(
+                                            Routes.core, (route) => false);
+                                      }
+                                    });
+                                  }
+                                },
+                              ),
+                        Gap(20.h),
+                      ],
+                    ),
                   ),
-                  TextSpan(
-                    text: S.of(context).register,
-                    style: AppTextStyle(context).bodyText.copyWith(
-                          fontWeight: FontWeight.w400,
-                          color: colors(context).primaryColor,
-                          fontSize: 14.sp,
+                  // Phần bottom text
+                  SizedBox(
+                    height: 50.h,
+                    child: Center(
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: S.of(context).dontHaveAnAccount,
+                              style: AppTextStyle(context).bodyText.copyWith(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14.sp,
+                                  ),
+                            ),
+                            TextSpan(
+                              text: S.of(context).register,
+                              style: AppTextStyle(context).bodyText.copyWith(
+                                    fontWeight: FontWeight.w400,
+                                    color: colors(context).primaryColor,
+                                    fontSize: 14.sp,
+                                  ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap =
+                                    () => context.nav.pushNamed(Routes.signUp),
+                            ),
+                          ],
                         ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () => context.nav.pushNamed(Routes.signUp),
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-          ),
-        ),
-        body: FormBuilder(
-          key: formKey,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 20.w,
-              vertical: 80.h,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SvgPicture.asset(
-                  themeColor == AppColor.blackColor
-                      ? Assets.svg.fluffypawLogo
-                      : Assets.svg.fluffyPawDarl,
-                  width: 200.w,
-                ),
-                Gap(30.h),
-                Text(
-                  S.of(context).loginTitle,
-                  style: AppTextStyle(context).title,
-                ),
-                Gap(30.h),
-                CustomTextFormField(
-                  name: 'emailOrPhone',
-                  focusNode: fNodes[0],
-                  hintText: S.of(context).emailOrPhone,
-                  textInputType: TextInputType.text,
-                  controller: contactController,
-                  textInputAction: TextInputAction.next,
-                  validator: (value) => GlobalFunction.shopDesValidator(
-                    value: value!,
-                    hintText: S.of(context).emailOrPhone,
-                    context: context,
-                  ),
-                ),
-                Gap(30.h),
-                CustomTextFormField(
-                  name: 'password',
-                  focusNode: fNodes[1],
-                  hintText: S.of(context).password,
-                  textInputType: TextInputType.text,
-                  controller: passwordController,
-                  textInputAction: TextInputAction.done,
-                  obscureText: ref.watch(obscureText1),
-                  widget: IconButton(
-                    splashColor: Colors.transparent,
-                    onPressed: () {
-                      ref.read(obscureText1.notifier).state =
-                          !ref.read(obscureText1.notifier).state;
-                    },
-                    icon: Icon(
-                      !ref.read(obscureText1.notifier).state
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                  ),
-                  validator: (value) => GlobalFunction.passwordValidator(
-                    value: value!,
-                    hintText: S.of(context).password,
-                    context: context,
-                  ),
-                ),
-                Gap(50.h),
-                ref.watch(authController)
-                    ? const Align(
-                        alignment: Alignment.center,
-                        child: CircularProgressIndicator())
-                    : CustomButton(
-                        buttonText: S.of(context).login,
-                        onPressed: () {
-                          FocusScope.of(context).unfocus();
-                          if (formKey.currentState!.validate()) {
-                            ref
-                                .read(authController.notifier)
-                                .login(
-                                  contact: contactController.text,
-                                  password: passwordController.text,
-                                )
-                                .then((isSuccess) async {
-                              if (isSuccess) {
-                                
-                                context.nav.pushNamedAndRemoveUntil(
-                                    Routes.core, (route) => false);
-                              }
-                            });
-                          }
-                        },
-                      )
-              ],
             ),
           ),
         ),

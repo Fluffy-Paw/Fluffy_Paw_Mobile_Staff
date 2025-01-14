@@ -9,9 +9,12 @@ import 'package:fluffypawsm/core/utils/context_less_navigation.dart';
 import 'package:fluffypawsm/core/utils/global_function.dart';
 import 'package:fluffypawsm/data/controller/order_controller.dart';
 import 'package:fluffypawsm/data/controller/pet_controller.dart';
+import 'package:fluffypawsm/data/models/conversation/conversation_model.dart';
 import 'package:fluffypawsm/data/models/dashboard/dashboard_model.dart';
+import 'package:fluffypawsm/data/repositories/conversation_service_provider.dart';
 import 'package:fluffypawsm/dependency_injection/dependency_injection.dart';
 import 'package:fluffypawsm/presentation/pages/check_in_check_out/checkin_confirmation_screen.dart';
+import 'package:fluffypawsm/presentation/pages/conversation/layout/chat_screen.dart';
 import 'package:fluffypawsm/presentation/pages/order/components/order_status_card.dart';
 import 'package:fluffypawsm/presentation/pages/pet/pet_detail_screen.dart';
 import 'package:fluffypawsm/presentation/pages/tracking/tracking_screen.dart';
@@ -564,6 +567,7 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
               requestData: qrContent['data'] as Map<String, dynamic>,
               isCheckout:
                   isCheckout, // Pass the correct flag based on the operation
+              serviceTypeId: widget.order.serviceTypeId,
             ),
           ),
         );
@@ -725,7 +729,7 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
               Row(
                 children: [
                   Text(
-                    '#${widget.order.id}',
+                    '#${widget.order.code}',
                     style: AppTextStyle(context).bodyText.copyWith(
                         color: AppColor.blackColor,
                         fontWeight: FontWeight.w500),
@@ -780,21 +784,21 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
             style: AppTextStyle(context).bodyTextSmall.copyWith(
                 color: AppColor.blackColor, fontWeight: FontWeight.w700),
           ),
-          Gap(8.h),
-          Text(
-            '${S.of(context).address}:',
-            style: AppTextStyle(context).bodyTextSmall.copyWith(
-                  color: AppColor.blackColor.withOpacity(0.5),
-                ),
-          ),
-          Gap(8.h),
-          const Text(
-            'Default Address', // Giá trị mặc định cho address
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          //Gap(8.h),
+          // Text(
+          //   '${S.of(context).address}:',
+          //   style: AppTextStyle(context).bodyTextSmall.copyWith(
+          //         color: AppColor.blackColor.withOpacity(0.5),
+          //       ),
+          // ),
+          // Gap(8.h),
+          // const Text(
+          //   'Default Address', // Giá trị mặc định cho address
+          //   style: TextStyle(
+          //     color: Colors.black,
+          //     fontWeight: FontWeight.w500,
+          //   ),
+          // ),
           Gap(8.h),
           _buildInfoDateCardWidget(context: context),
         ],
@@ -810,11 +814,8 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Flexible(
-            flex: 1,
-            fit: FlexFit.tight,
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -829,35 +830,40 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
                   children: [
                     Icon(
                       Icons.calendar_month,
-                      size: 20.sp,
+                      size: 18.sp,
                     ),
-                    Gap(5.w),
-                    Text(
-                      DateFormat("d MMM, y").format(widget.order.startTime),
-                      style: AppTextStyle(context).bodyTextSmall.copyWith(
+                    SizedBox(width: 4.w),
+                    Expanded(
+                      child: Text(
+                        DateFormat("d MMM, y").format(widget.order.startTime),
+                        style: AppTextStyle(context).bodyTextSmall.copyWith(
                           color: AppColor.blackColor,
-                          fontWeight: FontWeight.w500),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.sp,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     )
                   ],
                 )
               ],
             ),
           ),
-          Column(
-            children: List.generate(
-              5,
-              (index) => Container(
-                margin: const EdgeInsets.only(top: 5),
-                height: 3,
-                width: 1,
-                color: AppColor.blackColor.withOpacity(0.2),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
+            child: Column(
+              children: List.generate(
+                5,
+                (index) => Container(
+                  margin: EdgeInsets.only(top: 5.h),
+                  height: 3,
+                  width: 1,
+                  color: AppColor.blackColor.withOpacity(0.2),
+                ),
               ),
             ),
           ),
-          Gap(10.w),
-          Flexible(
-            flex: 1,
-            fit: FlexFit.tight,
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -872,17 +878,19 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
                   children: [
                     Icon(
                       Icons.calendar_month,
-                      size: 20.sp,
+                      size: 18.sp,
                     ),
-                    Gap(5.w),
-                    Text(
-                      // Delivery date mặc định = startTime + 2 ngày
-                      DateFormat("d MMM, y").format(
-                        widget.order.endDate,
-                      ),
-                      style: AppTextStyle(context).bodyTextSmall.copyWith(
+                    SizedBox(width: 4.w),
+                    Expanded(
+                      child: Text(
+                        DateFormat("d MMM, y").format(widget.order.endDate),
+                        style: AppTextStyle(context).bodyTextSmall.copyWith(
                           color: AppColor.blackColor,
-                          fontWeight: FontWeight.w500),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.sp,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     )
                   ],
                 )
@@ -895,82 +903,168 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
   }
 
   Widget _buildCustomerInfoCardWidget({required BuildContext context}) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h)
-          .copyWith(bottom: 10.h),
-      margin: EdgeInsets.symmetric(horizontal: 20.w).copyWith(top: 10.h),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColor.whiteColor,
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${S.of(context).customerInfo}:',
-            style: AppTextStyle(context).bodyTextSmall.copyWith(
-                color: AppColor.blackColor, fontWeight: FontWeight.w700),
-          ),
-          Gap(5.h),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: CircleAvatar(
-              radius: 24.sp,
-              child: Text(
-                widget.order.fullName[0].toUpperCase(),
-                style: const TextStyle(fontSize: 20),
-              ),
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h)
+        .copyWith(bottom: 10.h),
+    margin: EdgeInsets.symmetric(horizontal: 20.w).copyWith(top: 10.h),
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: AppColor.whiteColor,
+      borderRadius: BorderRadius.circular(12.r),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '${S.of(context).customerInfo}:',
+          style: AppTextStyle(context).bodyTextSmall.copyWith(
+              color: AppColor.blackColor, fontWeight: FontWeight.w700),
+        ),
+        Gap(5.h),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: CircleAvatar(
+            radius: 24.sp,
+            child: Text(
+              widget.order.fullName[0].toUpperCase(),
+              style: const TextStyle(fontSize: 20),
             ),
-            title: Text(
-              widget.order.fullName,
+          ),
+          title: Text(
+            widget.order.fullName,
+            style: AppTextStyle(context).bodyText.copyWith(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColor.blackColor,
+                ),
+          ),
+          subtitle: Padding(
+            padding: EdgeInsets.only(top: 5.h),
+            child: Text(
+              widget.order.phone,
               style: AppTextStyle(context).bodyText.copyWith(
-                    fontSize: 14.sp,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
-                    color: AppColor.blackColor,
+                    color: AppColor.blackColor.withOpacity(0.7),
                   ),
             ),
-            subtitle: Padding(
-              padding: EdgeInsets.only(top: 5.h),
-              child: Text(
-                widget.order.phone,
-                style: AppTextStyle(context).bodyText.copyWith(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColor.blackColor.withOpacity(0.7),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Material(
+                color: AppColor.violetColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(100),
+                  onTap: () async {
+                    try {
+                      // Show loading dialog
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+
+                      // Check existing conversation
+                      final existingConv = await ref
+                          .read(conversationServiceProvider)
+                          .getExistingConversation(widget.order.petOwnerAccountId);
+
+                      if (existingConv != null) {
+                        // Use existing conversation
+                        final conversation = ConversationModel.fromMap(existingConv.data['data']);
+                        if (mounted) {
+                          Navigator.pop(context); // Close loading
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatScreen(
+                                conversationId: conversation.id,
+                                poAccountId: conversation.staffAccountId,
+                                storeName: widget.order.fullName,
+                              ),
+                            ),
+                          );
+                        }
+                      } else {
+                        // Create new conversation
+                        final response = await ref
+                            .read(conversationServiceProvider)
+                            .createConversation(widget.order.petOwnerAccountId);
+
+                        if (response.statusCode == 200) {
+                          final newConversation = ConversationModel.fromMap(response.data['data']);
+                          if (mounted) {
+                            Navigator.pop(context); // Close loading
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatScreen(
+                                  conversationId: newConversation.id,
+                                  poAccountId: newConversation.staffAccountId,
+                                  storeName: widget.order.fullName,
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      Navigator.pop(context); // Close loading
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error starting conversation: $e')),
+                      );
+                    }
+                  },
+                  child: Container(
+                    height: 45.h,
+                    width: 45.w,
+                    decoration: const BoxDecoration(shape: BoxShape.circle),
+                    child: const Center(
+                      child: Icon(
+                        Icons.chat_bubble_outline,
+                        color: AppColor.whiteColor,
+                      ),
                     ),
+                  ),
+                ),
               ),
-            ),
-            trailing: Material(
-              color: AppColor.violetColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(100),
-              ),
-              // child: InkWell(
-              //   borderRadius: BorderRadius.circular(100),
-              //   onTap: () {
-              //     // UrlLauncher.launchUrl(
-              //     //   Uri.parse("tel://${widget.order.phone}"),
-              //     // );
-              //   },
-              //   child: Container(
-              //     height: 45.h,
-              //     width: 45.w,
-              //     decoration: const BoxDecoration(shape: BoxShape.circle),
-              //     child: const Center(
-              //       child: Icon(
-              //         Icons.call,
-              //         color: AppColor.whiteColor,
+              Gap(8.w),
+              // Material(
+              //   color: AppColor.violetColor,
+              //   shape: RoundedRectangleBorder(
+              //     borderRadius: BorderRadius.circular(100),
+              //   ),
+              //   child: InkWell(
+              //     borderRadius: BorderRadius.circular(100),
+              //     onTap: () {
+              //       // Handle call
+              //     },
+              //     child: Container(
+              //       height: 45.h,
+              //       width: 45.w,
+              //       decoration: const BoxDecoration(shape: BoxShape.circle),
+              //       child: const Center(
+              //         child: Icon(
+              //           Icons.call,
+              //           color: AppColor.whiteColor,
+              //         ),
               //       ),
               //     ),
               //   ),
               // ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
+            ],
+          ),
+        )
+      ],
+    ),
+  );
+}
 
   Widget _buildItemCardWidget({required BuildContext context}) {
     return Container(
@@ -993,7 +1087,7 @@ class _OrderDetailsLayoutState extends ConsumerState<OrderDetailsLayout> {
                     color: AppColor.blackColor, fontWeight: FontWeight.w700),
               ),
               Text(
-                '\$${widget.order.cost}',
+                '${widget.order.cost}VND',
                 style: AppTextStyle(context).bodyTextSmall.copyWith(
                     color: AppColor.blackColor, fontWeight: FontWeight.w700),
               )

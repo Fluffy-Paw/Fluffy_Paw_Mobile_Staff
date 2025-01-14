@@ -56,21 +56,22 @@ class DashboardInfo {
       endedOrders: endedOrders ?? this.endedOrders,
     );
   }
+
   factory DashboardInfo.empty() {
-  return DashboardInfo(
-    todayOrders: 0,
-    todayEarning: "0",
-    thisMonthEarnings: "0",
-    processingOrders: 0,
-    orders: [],
-    acceptedOrders: 0,
-    pendingOrders: 0,
-    canceledOrders: 0,
-    deniedOrders: 0,
-    overTimeOrders: 0,
-    endedOrders: 0,
-  );
-}
+    return DashboardInfo(
+      todayOrders: 0,
+      todayEarning: "0",
+      thisMonthEarnings: "0",
+      processingOrders: 0,
+      orders: [],
+      acceptedOrders: 0,
+      pendingOrders: 0,
+      canceledOrders: 0,
+      deniedOrders: 0,
+      overTimeOrders: 0,
+      endedOrders: 0,
+    );
+  }
 
   static int countOrdersByStatus(List<Order> orders, String status) {
     return orders.where((order) => order.status == status).length;
@@ -79,7 +80,8 @@ class DashboardInfo {
   static int calculateTodayEarnings(List<Order> orders) {
     final today = DateTime.now();
     return orders.where((order) {
-      return order.createDate.year == today.year &&
+      return order.status == 'Ended' &&
+          order.createDate.year == today.year &&
           order.createDate.month == today.month &&
           order.createDate.day == today.day;
     }).fold(0, (total, order) => total + order.cost);
@@ -88,7 +90,8 @@ class DashboardInfo {
   static int calculateThisMonthEarnings(List<Order> orders) {
     final today = DateTime.now();
     return orders.where((order) {
-      return order.createDate.year == today.year &&
+      return order.status == 'Ended' &&
+          order.createDate.year == today.year &&
           order.createDate.month == today.month;
     }).fold(0, (total, order) => total + order.cost);
   }
@@ -201,11 +204,11 @@ class DashboardInfo {
   }
 }
 
-
-
 class Order {
   final int id;
   final int petId;
+  final String code;
+  final int petOwnerAccountId;
   final String fullName;
   final String phone;
   final String serviceName;
@@ -213,10 +216,11 @@ class Order {
   final DateTime startTime;
   final bool checkin;
   final bool checkout;
-  final DateTime endDate; 
+  final DateTime endDate;
   final String status;
   final String paymentMethod;
-  final int cost; 
+  final int cost;
+  final int serviceTypeId;
 
   Order({
     required this.id,
@@ -229,9 +233,12 @@ class Order {
     required this.checkin,
     required this.checkout,
     required this.status,
-    required this.cost, 
+    required this.cost,
     required this.paymentMethod,
-    required this.endDate
+    required this.endDate,
+    required this.code,
+    required this.petOwnerAccountId,
+    required this.serviceTypeId,
   });
 
   Map<String, dynamic> toMap() {
@@ -240,35 +247,38 @@ class Order {
       'petId': petId,
       'fullName': fullName,
       'phone': phone,
+      'serviceTypeId': serviceTypeId,
       'serviceName': serviceName,
       'createDate': createDate.toIso8601String(),
       'startTime': startTime.toIso8601String(),
       'status': status,
-      'cost': cost, 
+      'cost': cost,
       'paymentMethod': paymentMethod,
       'checkin': checkin,
       'checkOut': checkout,
-      'endTime':endDate
+      'code': code,
+      'petOwnerAccountId': petOwnerAccountId,
+      'endTime': endDate
     };
   }
 
   factory Order.fromMap(Map<String, dynamic> map) {
     return Order(
-      id: map['id'] as int,
-      petId: map['petId'] as int,
-      fullName: map['fullName'] as String,
-      phone: map['phone'] as String,
-      serviceName: map['serviceName'] as String,
-      createDate: DateTime.parse(map['createDate'] as String),
-      startTime: DateTime.parse(map['startTime'] as String),
-      status: map['status'] as String,
-      paymentMethod: map['paymentMethod'] as String,
-      cost: map['cost'] as int, // Ánh xạ trường cost từ response JSON
-      checkin: map['checkin'] as bool,
-      checkout: map['checkOut'] as bool,
-      endDate: DateTime.parse(map['endTime'] as String),
-
-    );
+        id: map['id'] as int,
+        petId: map['petId'] as int,
+        fullName: map['fullName'] as String,
+        phone: map['phone'] as String,
+        serviceName: map['serviceName'] as String,
+        createDate: DateTime.parse(map['createDate'] as String),
+        startTime: DateTime.parse(map['startTime'] as String),
+        status: map['status'] as String,
+        serviceTypeId: map['serviceTypeId'] as int,
+        paymentMethod: map['paymentMethod'] as String,
+        cost: map['cost'] as int, // Ánh xạ trường cost từ response JSON
+        checkin: map['checkin'] as bool,
+        checkout: map['checkOut'] as bool,
+        endDate: DateTime.parse(map['endTime'] as String),
+        petOwnerAccountId: map['petOwnerAccountId'] as int,
+        code: map['code'] as String);
   }
 }
-

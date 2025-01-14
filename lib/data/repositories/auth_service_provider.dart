@@ -74,6 +74,26 @@ class AuthService implements AuthProvider {
       rethrow;
     }
   }
+  @override
+  Future<Response> forgotPassword({
+    required String phoneNumber,
+    required String newPassword,
+  }) async {
+    // Định dạng số điện thoại để phù hợp với API
+    String formattedPhone = phoneNumber;
+    if (phoneNumber.startsWith('+84')) {
+      formattedPhone = '0${phoneNumber.substring(3)}';
+    }
+
+    final response = await ref.read(apiClientProvider).patch(
+      AppConstants.forgotPasswordUrl,
+      data: {
+        'phoneNumber': formattedPhone,
+        'newPassword': newPassword,
+      },
+    );
+    return response;
+  }
 }
 
 final authServiceProvider = Provider((ref) => AuthService(ref));

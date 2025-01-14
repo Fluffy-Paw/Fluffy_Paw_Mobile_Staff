@@ -44,6 +44,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   dartz: ^0.10.1
   equatable: ^2.0.5
+  geolocator: ^13.0.2
   http: ^1.2.2
   flutter_riverpod: ^2.5.1
   google_fonts: ^6.2.1
@@ -67,6 +68,9 @@ dependencies:
   url_launcher: ^6.3.1
   file_picker: ^8.1.4
   crypto: ^3.0.6
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  flutter_dotenv: ^5.2.1
 
 
 
@@ -105,6 +109,7 @@ dependencies:
   signalr_core: ^1.1.2
   lottie: ^3.1.3
   pinput: ^5.0.0
+  flutter_launcher_icons: ^0.14.2
   animate_do: ^3.3.4
   #web_socket_channel: ^3.0.1
   lite_rolling_switch:
@@ -145,6 +150,7 @@ flutter:
     - assets/svg/summery_bag.svg
     - assets/svg/summery_ongoing_order.svg
     - assets/svg/doller.svg
+    - assets/env/api_key.env
     - assets/svg/total_doller.svg
     - assets/svg/active_bag.svg
     - assets/svg/active_dashboard.svg
@@ -173,6 +179,16 @@ flutter:
     - assets/image/default_image.png
     - assets/image/shop_logo.png
     - assets/image/under_review.png
+    - assets/banks/acb.svg
+    - assets/banks/agribank.svg
+    - assets/banks/bidv.svg
+    - assets/banks/mbbank.svg
+    - assets/banks/sacombank.svg
+    - assets/banks/techcombank.svg
+    - assets/banks/tpbank.svg
+    - assets/banks/vietcombank.svg
+    - assets/banks/vietinbank.svg
+    - assets/banks/vpbank.svg
 
 
 flutter_intl:
@@ -180,6 +196,11 @@ flutter_intl:
   use_deferred_loading: false
   arb_dir: lib/core/l10n
   output_dir: lib/core/generated
+flutter_launcher_icons:
+  android: "launcher_icon"  # Icon cho Android
+  ios: true  # Icon cho iOS
+  image_path: "assets/image/1024.png"  # Đường dẫn tới file icon
+  min_sdk_android: 21 # Android SDK tối thiểu
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

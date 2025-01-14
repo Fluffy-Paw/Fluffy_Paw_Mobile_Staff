@@ -76,13 +76,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "earnThisMonth":
             MessageLookupByLibrary.simpleMessage("Đã kiếm trong tháng này"),
         "earndThisMonth":
-            MessageLookupByLibrary.simpleMessage("Đã kiếm trong tháng này"),
+            MessageLookupByLibrary.simpleMessage("Doanh thu tháng"),
         "earningHistory":
             MessageLookupByLibrary.simpleMessage("Lịch sử thu nhập"),
         "edit": MessageLookupByLibrary.simpleMessage("Chỉnh sửa"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
-        "emailOrPhone":
-            MessageLookupByLibrary.simpleMessage("Email hoặc Số điện thoại"),
+        "emailOrPhone": MessageLookupByLibrary.simpleMessage("Tên đăng nhập"),
         "ended": MessageLookupByLibrary.simpleMessage("Đã kết thúc"),
         "enterCode": MessageLookupByLibrary.simpleMessage("Nhập mã"),
         "firstName": MessageLookupByLibrary.simpleMessage("Tên"),
@@ -115,8 +114,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "noServicesAvailable":
             MessageLookupByLibrary.simpleMessage("Chưa có dịch vụ nào"),
         "onGoing": MessageLookupByLibrary.simpleMessage("Đang giao"),
-        "ongoingOrder":
-            MessageLookupByLibrary.simpleMessage("Đơn hàng đang xử lý"),
+        "ongoingOrder": MessageLookupByLibrary.simpleMessage("Đang xử lý"),
         "online": MessageLookupByLibrary.simpleMessage("Trực tuyến"),
         "onlinePayment":
             MessageLookupByLibrary.simpleMessage("Thanh toán trực tuyến"),

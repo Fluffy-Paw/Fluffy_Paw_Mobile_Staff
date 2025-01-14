@@ -179,6 +179,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         conversationId: conversation.id,
         poAccountId: conversation.staffAccountId,
         storeName: conversation.poName ?? 'store name',
+        storeAvatar: conversation.poAvatar,
       ),
     ),
   ).then((_) {

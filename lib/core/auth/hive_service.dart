@@ -4,6 +4,7 @@ import 'package:fluffypawsm/data/models/profile/profile.dart';
 import 'package:fluffypawsm/data/models/profile/store_manager.dart';
 import 'package:fluffypawsm/data/models/service/service_by_brand.dart';
 import 'package:fluffypawsm/presentation/pages/store_manager/profile/store_manager_profile_layout.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -55,37 +56,47 @@ class HiveService {
     final userBox = await Hive.openBox(AppConstants.userBox);
     userBox.put(AppConstants.userData, userInfo.toMap());
   }
-  Future<String> userRole() async {
-    final token = await ref.read(hiveStoreService).getAuthToken();
-    final decodedToken = JwtDecoder.decode(token!);
-    final userRole = decodedToken[
-        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-        return userRole;
+  Future<String?> userRole() async {
+    try {
+      final token = await getAuthToken();
+      if (token != null) {
+        final decodedToken = JwtDecoder.decode(token);
+        return decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] as String?;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error getting user role: $e');
+      return null;
+    }
   }
 
-  // get user information
   Future<dynamic> getUserInfo() async {
-    final userBox = await Hive.openBox(AppConstants.userBox);
-    Map<dynamic, dynamic>? userInfo = userBox.get(AppConstants.userData);
-    if (userInfo != null) {
-      // final token = getAuthToken();
-      // final decodedToken = JwtDecoder.decode(token.toString());
-      // final userRole = decodedToken[
-      //     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-      String role = userRole().toString();
-      if (role == "Staff") {
-        Map<String, dynamic> userInfoStringKeys =
-            userInfo.cast<String, dynamic>();
-        User user = User.fromMap(userInfoStringKeys);
-        return user;
-      } else {
-        Map<String, dynamic> userInfoStringKeys =
-            userInfo.cast<String, dynamic>();
-        StoreManagerProfileModel user = StoreManagerProfileModel.fromMap(userInfoStringKeys);
-        return user;
+    try {
+      final userBox = await Hive.openBox(AppConstants.userBox);
+      Map<dynamic, dynamic>? userInfo = userBox.get(AppConstants.userData);
+      
+      if (userInfo != null) {
+        // Đợi lấy role
+        final role = await userRole();
+        debugPrint('User Role: $role'); // Debug log
+
+        // Convert dynamic Map to String Map
+        Map<String, dynamic> userInfoStringKeys = Map<String, dynamic>.from(userInfo);
+        
+        // Kiểm tra role và trả về đúng model
+        if (role == "Staff") {
+          debugPrint('Converting to User model'); // Debug log
+          return User.fromMap(userInfoStringKeys);
+        } else {
+          debugPrint('Converting to StoreManagerProfileModel'); // Debug log
+          return StoreManagerProfileModel.fromMap(userInfoStringKeys);
+        }
       }
+      return null;
+    } catch (e) {
+      debugPrint('Error getting user info: $e');
+      return null;
     }
-    return null;
   }
 
   //remove user data
